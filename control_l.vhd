@@ -2,6 +2,9 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 
+-- Work is a default library
+use work.opcodes.all;
+
 ENTITY control_l IS
     PORT (ir     : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
           op     : OUT STD_LOGIC;
@@ -19,20 +22,23 @@ BEGIN
 	-- Aqui iria la generacion de las senales de control del datapath
 
 	op <= ir(8);
-	
+
 	with ir(15 downto 12) select
 		ldpc <=
-			'0' when "1111",
+			'0' when SPECIAL, -- For now only HALT
 			'1' when others;
-			
+
 	wrd <= '1';
 	addr_a <= ir(11 downto 9);
 	addr_d <= ir(11 downto 9);
-	
-	with ir(7) select
-		immed <=
-			"00000000" & ir(7 downto 0) when '0',
-			"11111111" & ir(7 downto 0) when '1',
-			(others => '0') when others;
-	 
+
+      -- I guess this does the same as the below
+      immed <= std_logic_vector(resize(signed(ir(7 downto 0)), immed'length));
+
+	--with ir(7) select
+	--	immed <=
+	--		"00000000" & ir(7 downto 0) when '0',
+	--		"11111111" & ir(7 downto 0) when '1',
+	--		(others => '0') when others;
+
 END Structure;

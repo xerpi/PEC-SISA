@@ -1,7 +1,10 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;        --Esta libreria sera necesaria si usais conversiones TO_INTEGER
-USE ieee.std_logic_unsigned.all; --Esta libreria sera necesaria si usais conversiones CONV_INTEGER
+
+-- this library does not belongs to standard ieee. Better use numeric_std
+-- CONV_INTEGER(x) = to_integer(unsigned(x))
+--USE ieee.std_logic_unsigned.all; --Esta libreria sera necesaria si usais conversiones CONV_INTEGER
 
 ENTITY regfile IS
     PORT (clk    : IN  STD_LOGIC;
@@ -21,16 +24,16 @@ BEGIN
     -- Aqui iria la definicion del comportamiento del banco de registros
     -- Os puede ser util usar la funcion "conv_integer" o "to_integer"
     -- Una buena (y limpia) implementacion no deberia ocupar más de 7 o 8 lineas
-	 
+
 	process(clk)
 	begin
 		if rising_edge(clk) then
 			if wrd = '1' then
-				registers(conv_integer(addr_d)) <= d;
+				registers(to_integer(unsigned(addr_a))) <= d;
 			end if;
 		end if;
 	end process;
-	
-	a <= registers(conv_integer(addr_a));
+
+	a <= registers(to_integer(unsigned(addr_a)));
 
 END Structure;
