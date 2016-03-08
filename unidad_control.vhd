@@ -52,10 +52,10 @@ BEGIN
 		immed => immed
 	);
 	
-	with not sel0 select
+	with sel0 select
 		out0 <=
-			new_pc + 2 when '0',
-			new_pc when '1',
+			new_pc + 2 when '1',
+			new_pc when '0',
 			(others => '0') when others;
 			
 	with boot select
