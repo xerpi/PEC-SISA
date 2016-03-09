@@ -20,6 +20,9 @@ architecture Structure of multi is
 	constant FETCH: std_logic := '0';
 	constant DEMW: std_logic := '1';
 	signal state: std_logic;
+
+      signal agregate_in: std_logic_vector(3 downto 0);
+      signal agregate_out: std_logic_vector(3 downto 0);
 	-- Aqui iria la declaracion de las los estados de la maquina de estados
 
 begin
@@ -29,7 +32,7 @@ begin
 
 	process(clk)
 	begin
-		if rising_edge(clk) then
+            if rising_edge(clk) then
 			if boot = '1' then
 				state <= FETCH;
 			else
@@ -37,5 +40,20 @@ begin
 			end if;
 		end if;
 	end process;
-	
+
+      ldir    <= not state;
+      ins_dad <=     state;
+
+      agregate_in <= wrd_1 & wr_m_1 & w_b & ldpc_1;
+
+      with state select
+            agregate_out <=
+                  agregate_in when '1',
+                  (others => '0') when others;
+
+      wrd <= agregate_out(3);
+      wr_m <= agregate_out(2);
+      word_byte <= agregate_out(1);
+      ldpc <= agregate_out(0);
+
 end Structure;

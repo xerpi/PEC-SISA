@@ -27,26 +27,28 @@ ARCHITECTURE Structure OF datapath IS
 	 -- Tambien crearemos los cables/buses (signals) necesarios para unir las entidades
 
 	COMPONENT regfile IS
-		 PORT (clk    : IN  STD_LOGIC;
-				 wrd    : IN  STD_LOGIC;
-				 d      : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				 addr_a : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-				 addr_b : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-				 addr_d : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-				 a      : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-				 b      : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+		 PORT (
+                  clk    : IN STD_LOGIC;
+                  wrd    : IN STD_LOGIC;
+                  d      : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+                  addr_a : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+                  addr_b : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+                  addr_d : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+                  a      : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+                  b      : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 	END COMPONENT;
 
 	COMPONENT alu IS
-		 PORT (x  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				 y  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				 op : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
-				 w  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+            PORT (
+                  x  : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+                  y  : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+                  op : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+                  w  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 	END COMPONENT;
 
 	signal alu_w: std_logic_vector(15 downto 0);
 	signal regfile_a: std_logic_vector(15 downto 0);
-	
+
 	signal in_d_out: std_logic_vector(15 downto 0);
 	signal immed_x2_out: std_logic_vector(15 downto 0);
 	signal addr_m_out: std_logic_vector(15 downto 0);
@@ -64,7 +66,7 @@ BEGIN
 			immed when '1',
 			immed(14 downto 0) & '0' when '0',
 			(others => '0') when others;
-			
+
 	with ins_dad select
 		addr_m_out <=
 			alu_w when '1',
@@ -92,7 +94,7 @@ BEGIN
 		op => op,
 		w  => alu_w
 	);
-	
+
 	addr_m <= addr_m_out;
 
 END Structure;

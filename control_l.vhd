@@ -21,38 +21,67 @@ ENTITY control_l IS
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
+
+signal agregate_in: std_logic_vector(4 downto 0);
+
 BEGIN
 
-	-- Aqui iria la generacion de las senales de control del datapath
+      -- Aqui iria la generacion de las senales de control del datapath
 
-	op(0) <= ir(8);
-	op(1) <= 
-	
-	op <= "00" when ir(15 downto 12)="0101" and ir(8)=0 else
-			"01" when ir(15 downto 12)="0101" and ir(8)=1 else
-			"10";
+      -- vhdl no deja hacer with de concatenacion?
+      agregate_in <= ir(15 downto 12) & ir(8);
+      with agregate_in select
+      	op <= "00" when MOV & '0',
+      	      "01" when MOV & '1',
+      		"10" when others;
 
-	with ir(15 downto 12)&ir(8) select
-		op <= "00" when "01010",
-		      "01" when "01011",
-				"10" when others;
-				
-	with ir(15 downto 12) select
-		ldpc <=
-			'0' when SPECIAL, -- For now only HALT
-			'1' when others;
+      with ir(15 downto 12) select
+      	ldpc <=
+      		'0' when SPECIAL, -- For now only HALT
+      		'1' when others;
 
-	wrd <= '1';
-	addr_a <= ir(11 downto 9);
-	addr_d <= ir(11 downto 9);
+      with ir(15 downto 12) select
+      	wrd <=
+      		'1' when LOAD,
+                  '1' when MOV,
+      		'0' when others;
 
-      -- I guess this does the same as the below
+      addr_a <= ir(11 downto 9);
+      addr_b <= ir(11 downto 9);
+      addr_d <= ir(11 downto 9);
+
+      with ir(15 downto 12) select
+            immed <=
+                  std_logic_vector(resize(signed(ir(7 downto 0)), immed'length)) when MOV,
+                  std_logic_vector(resize(signed(ir(5 downto 0)), immed'length)) when LOAD,
+                  std_logic_vector(resize(signed(ir(5 downto 0)), immed'length)) when STORE,
+                  std_logic_vector(resize(signed(ir(5 downto 0)), immed'length)) when LOAD_BYTE,
+                  std_logic_vector(resize(signed(ir(5 downto 0)), immed'length)) when STORE_BYTE,
+                  (others => '0') when others;
       immed <= std_logic_vector(resize(signed(ir(7 downto 0)), immed'length));
 
-	--with ir(7) select
-	--	immed <=
-	--		"00000000" & ir(7 downto 0) when '0',
-	--		"11111111" & ir(7 downto 0) when '1',
-	--		(others => '0') when others;
+      with ir(15 downto 12) select
+            wr_m <=
+                  '1' when STORE,
+                  '0' when others;
+
+      with ir(15 downto 12) select
+            in_d <=
+                  '1' when LOAD,
+                  '0' when others;
+
+
+      with ir(15 downto 12) select
+            immed_x2 <=
+                  '1' when LOAD,
+                  '1' when STORE,
+                  '0' when others;
+
+      with ir(15 downto 12) select
+            word_byte <=
+                  '1' when LOAD_BYTE,
+                  '1' when STORE_BYTE,
+                  '0' when others;
+
 
 END Structure;
