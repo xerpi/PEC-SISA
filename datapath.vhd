@@ -19,7 +19,6 @@ ENTITY datapath IS
           data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 END datapath;
 
-
 ARCHITECTURE Structure OF datapath IS
 
 	 -- Aqui iria la declaracion de las entidades que vamos a usar
@@ -63,8 +62,8 @@ BEGIN
 
 	with immed_x2 select
 		immed_x2_out <=
-			immed when '1',
-			immed(14 downto 0) & '0' when '0',
+			immed when '0',
+			immed(14 downto 0) & '0' when '1',
 			(others => '0') when others;
 
 	with ins_dad select

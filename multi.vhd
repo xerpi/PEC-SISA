@@ -17,13 +17,19 @@ entity multi is
 end entity;
 
 architecture Structure of multi is
-	constant FETCH: std_logic := '0';
-	constant DEMW: std_logic := '1';
-	signal state: std_logic;
+	--constant FETCH: std_logic := '0';
+	--constant DEMW: std_logic := '1';
+	--signal state: std_logic;
 
       signal agregate_in: std_logic_vector(3 downto 0);
       signal agregate_out: std_logic_vector(3 downto 0);
 	-- Aqui iria la declaracion de las los estados de la maquina de estados
+
+-- Build an enumerated type for the state machine
+	type state_type is (FETCH, DEMW);
+
+	-- Register to hold the current state
+	signal state   : state_type;
 
 begin
 
@@ -32,23 +38,34 @@ begin
 
 	process(clk)
 	begin
-            if rising_edge(clk) then
+		if rising_edge(clk) then
 			if boot = '1' then
 				state <= FETCH;
 			else
-				state <= not state;
+				if state = FETCH then
+					state <= DEMW;
+				else
+					state <= FETCH;
+				end if;
 			end if;
 		end if;
 	end process;
 
-      ldir    <= not state;
-      ins_dad <=     state;
+	with state select
+			ldir <=
+					'1' when FETCH,
+					'0' when others;
+						
+	with state select
+		ins_dad <=
+				'1' when DEMW,
+				'0' when others;
 
       agregate_in <= wrd_1 & wr_m_1 & w_b & ldpc_1;
 
       with state select
             agregate_out <=
-                  agregate_in when '1',
+                  agregate_in when DEMW,
                   (others => '0') when others;
 
       wrd <= agregate_out(3);

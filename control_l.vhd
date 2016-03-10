@@ -31,9 +31,10 @@ BEGIN
       -- vhdl no deja hacer with de concatenacion?
       agregate_in <= ir(15 downto 12) & ir(8);
       with agregate_in select
-      	op <= "00" when MOV & '0',
-      	      "01" when MOV & '1',
-      		"10" when others;
+      	op <=
+				"00" when MOV & '0',
+				"01" when MOV & '1',
+				"10" when others;
 
       with ir(15 downto 12) select
       	ldpc <=
@@ -43,7 +44,7 @@ BEGIN
       with ir(15 downto 12) select
       	wrd <=
       		'1' when LOAD,
-                  '1' when MOV,
+				'1' when MOV,
       		'0' when others;
 
       addr_a <= ir(11 downto 9);
@@ -58,7 +59,7 @@ BEGIN
                   std_logic_vector(resize(signed(ir(5 downto 0)), immed'length)) when LOAD_BYTE,
                   std_logic_vector(resize(signed(ir(5 downto 0)), immed'length)) when STORE_BYTE,
                   (others => '0') when others;
-      immed <= std_logic_vector(resize(signed(ir(7 downto 0)), immed'length));
+      --immed <= std_logic_vector(resize(signed(ir(7 downto 0)), immed'length));
 
       with ir(15 downto 12) select
             wr_m <=
