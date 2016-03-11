@@ -16,7 +16,7 @@ INPUT: $(OBJECTS)
 %.o: %.vhd
 	ghdl -a $(GHDLFLAGS) $^
 
-simul:
+simul: INPUT
 	ghdl -r $(INPUT) --stop-time=$(STOP_TIME) --wave=$(INPUT).ghw
 
 clean:

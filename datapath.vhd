@@ -45,8 +45,8 @@ ARCHITECTURE Structure OF datapath IS
                   w  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 	END COMPONENT;
 
-	signal alu_w: std_logic_vector(15 downto 0);
-	signal regfile_a: std_logic_vector(15 downto 0);
+	signal alu0_w: std_logic_vector(15 downto 0);
+	signal reg0_a: std_logic_vector(15 downto 0);
 
 	signal in_d_out: std_logic_vector(15 downto 0);
 	signal immed_x2_out: std_logic_vector(15 downto 0);
@@ -56,7 +56,7 @@ BEGIN
 
 	with in_d select
 		in_d_out <=
-			alu_w when '0',
+			alu0_w when '0',
 			datard_m when '1',
 			(others => '0') when others;
 
@@ -68,7 +68,7 @@ BEGIN
 
 	with ins_dad select
 		addr_m_out <=
-			alu_w when '1',
+			alu0_w when '1',
 			pc when '0',
 			(others => '0') when others;
 
@@ -83,15 +83,15 @@ BEGIN
 		addr_a => addr_a,
 		addr_b => addr_b,
 		addr_d => addr_d,
-		a      => regfile_a,
+		a      => reg0_a,
 		b      => data_wr
 	);
 
 	alu0: alu port map(
-		x  => regfile_a,
+		x  => reg0_a,
 		y  => immed_x2_out,
 		op => op,
-		w  => alu_w
+		w  => alu0_w
 	);
 
 	addr_m <= addr_m_out;

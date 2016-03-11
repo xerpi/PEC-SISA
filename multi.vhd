@@ -52,25 +52,25 @@ begin
 	end process;
 
 	with state select
-			ldir <=
-					'1' when FETCH,
-					'0' when others;
-						
+		ldir <=
+			'1' when FETCH,
+			'0' when others;
+
 	with state select
 		ins_dad <=
-				'1' when DEMW,
-				'0' when others;
+			'1' when DEMW,
+			'0' when others;
 
-      agregate_in <= wrd_1 & wr_m_1 & w_b & ldpc_1;
+	agregate_in <= wrd_1 & wr_m_1 & w_b & ldpc_1;
 
-      with state select
-            agregate_out <=
-                  agregate_in when DEMW,
-                  (others => '0') when others;
+	with state select
+		agregate_out <=
+			agregate_in when DEMW,
+			(others => '0') when others;
 
-      wrd <= agregate_out(3);
-      wr_m <= agregate_out(2);
-      word_byte <= agregate_out(1);
-      ldpc <= agregate_out(0);
+	wrd <= agregate_out(3);
+	wr_m <= agregate_out(2);
+	word_byte <= agregate_out(1);
+	ldpc <= agregate_out(0);
 
 end Structure;

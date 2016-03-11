@@ -11,7 +11,7 @@ ENTITY regfile IS
           wrd    : IN  STD_LOGIC;
           d      : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
           addr_a : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-          addr_b : IN STD_LOGIC_VECTOR(2 DOWNTO 0); 
+          addr_b : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
           addr_d : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
           a      : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           b      : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
@@ -19,19 +19,19 @@ END regfile;
 
 
 ARCHITECTURE Structure OF regfile IS
-    -- Aqui iria la definicion de los registros
+	-- Aqui iria la definicion de los registros
 	type REGISTERS_T is array (7 downto 0) of std_logic_vector(15 downto 0);
 	signal registers: REGISTERS_T := (others => (others => '0'));
 BEGIN
-    -- Aqui iria la definicion del comportamiento del banco de registros
-    -- Os puede ser util usar la funcion "conv_integer" o "to_integer"
-    -- Una buena (y limpia) implementacion no deberia ocupar más de 7 o 8 lineas
+	-- Aqui iria la definicion del comportamiento del banco de registros
+	-- Os puede ser util usar la funcion "conv_integer" o "to_integer"
+	-- Una buena (y limpia) implementacion no deberia ocupar más de 7 o 8 lineas
 
 	process(clk)
 	begin
 		if rising_edge(clk) then
 			if wrd = '1' then
-				registers(to_integer(unsigned(addr_a))) <= d;
+				registers(to_integer(unsigned(addr_d))) <= d;
 			end if;
 		end if;
 	end process;
