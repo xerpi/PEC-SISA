@@ -28,6 +28,9 @@ architecture comportament of SRAMController is
 			  reset : IN STD_LOGIC := '0';
 			  clk : IN STD_LOGIC;
 			  WR : IN STD_LOGIC := '0';
+			  byte_m : IN STD_LOGIC := '0';
+			  lsb : IN STD_LOGIC := '0';
+			  cont : IN STD_LOGIC_VECTOR(2 DOWNTO 0) := "000";
 			  SRAM_UB_N : OUT STD_LOGIC;
 			  SRAM_LB_N : OUT STD_LOGIC;
 			  SRAM_CE_N : OUT STD_LOGIC;
@@ -35,16 +38,28 @@ architecture comportament of SRAMController is
 			  SRAM_WE_N : OUT STD_LOGIC
 		 );
 	END COMPONENT;
-
 	
 	signal byte_m_conc_adress_0: std_logic_vector(1 downto 0);
+	--signal cont: std_logic_vector(2 downto 0) := (others => '0');
+	signal cont: std_logic_vector(2 downto 0) := "100";
+	
 begin
+
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			cont <= cont + 1;
+		end if;
+	end process;
 
 
 	sm1_0: SM1 port map(
 		reset => '0',
 		clk => clk,
 		WR => WR,
+		byte_m => byte_m,
+		lsb => address(0),
+		cont => cont,
 		SRAM_UB_N => SRAM_UB_N,
 		SRAM_LB_N => SRAM_LB_N,
 		SRAM_CE_N => SRAM_CE_N,
@@ -53,10 +68,15 @@ begin
 	);
 	
 	SRAM_ADDR <= "000" & address(15 downto 1);
-	--dataReaded <= SRAM_DQ;
-	SRAM_DQ <= (others => 'Z');--dataToWrite;
+	
+	with WR select
+		SRAM_DQ <=
+			(others => 'Z') when '0',
+			dataToWrite when '1',
+			(others => 'Z') when others;
 	
 	byte_m_conc_adress_0 <= byte_m & address(0);
+	
 	with byte_m_conc_adress_0 select
 		dataReaded <=
 			std_logic_vector(resize(signed(SRAM_DQ(7 downto 0)), dataReaded'length)) when "10",
