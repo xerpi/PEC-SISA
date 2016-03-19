@@ -5,7 +5,6 @@ USE ieee.std_logic_unsigned.all;
 
 entity SRAMController is
     port (clk         : in    std_logic;
-          -- seÃ±ales para la placa de desarrollo
           SRAM_ADDR   : out   std_logic_vector(17 downto 0);
           SRAM_DQ     : inout std_logic_vector(15 downto 0);
           SRAM_UB_N   : out   std_logic;
@@ -13,7 +12,6 @@ entity SRAMController is
           SRAM_CE_N   : out   std_logic := '1';
           SRAM_OE_N   : out   std_logic := '1';
           SRAM_WE_N   : out   std_logic := '1';
-          -- seÃ±ales internas del procesador
           address     : in    std_logic_vector(15 downto 0) := "0000000000000000";
           dataReaded  : out   std_logic_vector(15 downto 0);
           dataToWrite : in    std_logic_vector(15 downto 0);
@@ -38,11 +36,12 @@ architecture comportament of SRAMController is
 			  SRAM_WE_N : OUT STD_LOGIC
 		 );
 	END COMPONENT;
-	
-	signal byte_m_conc_adress_0: std_logic_vector(1 downto 0);
+
+	signal byte_m_conc_address_0: std_logic_vector(1 downto 0);
+	signal WR_conc_byte_m_conc_address_0: std_logic_vector(2 downto 0);
 	--signal cont: std_logic_vector(2 downto 0) := (others => '0');
 	signal cont: std_logic_vector(2 downto 0) := "100";
-	
+
 begin
 
 	process(clk)
@@ -66,18 +65,23 @@ begin
 		SRAM_OE_N => SRAM_OE_N,
 		SRAM_WE_N => SRAM_WE_N
 	);
-	
+
 	SRAM_ADDR <= "000" & address(15 downto 1);
-	
-	with WR select
+
+	WR_conc_byte_m_conc_address_0 <= WR & byte_m & address(0);
+
+	with WR_conc_byte_m_conc_address_0 select
 		SRAM_DQ <=
-			(others => 'Z') when '0',
-			dataToWrite when '1',
+			"ZZZZZZZZ" & dataToWrite(7 downto 0) when "110",
+			dataToWrite(7 downto 0) & "ZZZZZZZZ" when "111",
+			dataToWrite when "100",
+			dataToWrite when "101", --unaligned store!
 			(others => 'Z') when others;
-	
-	byte_m_conc_adress_0 <= byte_m & address(0);
-	
-	with byte_m_conc_adress_0 select
+
+
+	byte_m_conc_address_0 <= byte_m & address(0);
+
+	with byte_m_conc_address_0 select
 		dataReaded <=
 			std_logic_vector(resize(signed(SRAM_DQ(7 downto 0)), dataReaded'length)) when "10",
 			std_logic_vector(resize(signed(SRAM_DQ(15 downto 8)), dataReaded'length)) when "11",

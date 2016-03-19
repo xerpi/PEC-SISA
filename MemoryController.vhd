@@ -1,6 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use ieee.std_logic_unsigned.all;
+
 
 entity MemoryController is
     port (CLOCK_50  : in  std_logic;
@@ -40,7 +40,7 @@ architecture comportament of MemoryController is
 	end COMPONENT;
 
 	signal we_sram: std_logic;
-	
+
 begin
 
 	SRAMController0: SRAMController port map(
@@ -60,7 +60,7 @@ begin
 		WR => we_sram,
 		byte_m => byte_m
 	);
-	
+
 	with addr >= X"C000" select
 		we_sram <= '0' when true,
 			we when others;

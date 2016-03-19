@@ -6,7 +6,7 @@ OBJECTS-=opcodes.o
 INPUT ?= test_sisa
 # Stop simulation at stop_time. If not defined environment
 # variable it will be defined as test_sisa
-STOP_TIME ?= 160ns
+STOP_TIME ?= 12000ns
 
 all: INPUT
 
