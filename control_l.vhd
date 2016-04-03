@@ -8,6 +8,7 @@ use work.opcodes.all;
 ENTITY control_l IS
     PORT (ir        : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
           op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+          func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
           ldpc      : OUT STD_LOGIC;
           wrd       : OUT STD_LOGIC;
           addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
