@@ -5,6 +5,7 @@ USE ieee.numeric_std.all;
 ENTITY datapath IS
     PORT (clk      : IN  STD_LOGIC;
           op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
+          func     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
           wrd      : IN  STD_LOGIC;
           addr_a   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
           addr_b   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -39,10 +40,11 @@ ARCHITECTURE Structure OF datapath IS
 
 	COMPONENT alu IS
             PORT (
-                  x  : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-                  y  : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-                  op : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
-                  w  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+                  x    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+                  y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+                  op   : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+                  func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+                  w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 	END COMPONENT;
 
 	signal alu0_w: std_logic_vector(15 downto 0);
@@ -91,6 +93,7 @@ BEGIN
 		x  => reg0_a,
 		y  => immed_x2_out,
 		op => op,
+		func => func,
 		w  => alu0_w
 	);
 
