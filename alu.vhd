@@ -11,20 +11,70 @@ ENTITY alu IS
 END alu;
 
 
+-- F          OP = 11       OP = 10                OP = 01                  OP = 00
+-------- ------------ ------------- ---------------------- ------------------------
+-- 000         MUL           Y             CMPLT(X, Y)             AND(X, Y)
+-- 001         MULH   MOVHI = Y & LOW(X)   CMPLE(X, Y)             OR(X, Y)
+-- 010         MULHU        ---               ---                  XOR(X,Y)
+-- 011         ---          ---            CMPEQ(X, Y)             NOT(X)
+-- 100         DIV          ---            CMPLTU(X, Y)            ADD(X, Y)
+-- 101         DIVU         ---            CMPLEU(X, Y)            SUB(X, Y)
+-- 110         ---          ---            ---                     SHA(X ,Y)
+-- 111         ---          ---            ---                     SHL(X, Y)
+
 ARCHITECTURE Structure OF alu IS
-	signal op_out: std_logic_vector(15 downto 0);
-	signal sum: std_logic_vector(15 downto 0);
+	COMPONENT alu_misc IS
+	    PORT (x    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	          y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	          func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+	          w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+	END COMPONENT;
+
+	COMPONENT alu_cmp IS
+	    PORT (x    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	          y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	          func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+	          w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+	END COMPONENT;
+
+	COMPONENT alu_al IS
+	    PORT (x    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	          y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	          func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+	          w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+	END COMPONENT;
+
+	signal misc0_w: std_logic_vector(15 downto 0);
+	signal cmp0_w : std_logic_vector(15 downto 0);
+	signal al0_w  : std_logic_vector(15 downto 0);
+
 BEGIN
 
-	sum <= std_logic_vector(unsigned(x) + unsigned(y));
+	misc0: alu_misc port map(
+		x    => x,
+		y    => y,
+		func => func,
+		w    => misc0_w
+	);
 
-	-- Aqui iria la definicion del comportamiento de la ALU
+	cmp0: alu_cmp port map(
+		x    => x,
+		y    => y,
+		func => func,
+		w    => cmp0_w
+	);
+
+	al0: alu_al port map(
+		x    => x,
+		y    => y,
+		func => func,
+		w    => al0_w
+	);
+
 	with op select
 		w <=
-			y when "00",
-			y(7 downto 0) & x(7 downto 0) when "01",
-			sum when "10",
-			(others => '0') when others;
-
+			al0_w when "00",
+			cmp0_w when "01",
+			misc0_w when others;
 
 END Structure;

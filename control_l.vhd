@@ -29,13 +29,20 @@ BEGIN
 
 	-- Aqui iria la generacion de las senales de control del datapath
 
-	-- vhdl no deja hacer with de concatenacion?
+	with ir(15 downto 12) select
+		op <=
+			"00" when ARIT_LOGIC | LOAD | LOAD_BYTE | STORE | STORE_BYTE,
+			"01" when COMPARE,
+			"10" when MOV,
+			"11" when others; --MULT_DIV
+
+	-- cambiar op
 	agregate_in <= ir(15 downto 12) & ir(8);
 	with agregate_in select
-		op <=
-			"00" when MOV & '0',
-			"01" when MOV & '1',
-			"10" when others;
+		func <=
+			"000" when MOV & '0',
+			"001" when MOV & '1',
+			ir(5 downto 3) when others;
 
 	with ir(15 downto 12) select
 		ldpc <=
