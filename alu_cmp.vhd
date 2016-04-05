@@ -9,8 +9,56 @@ ENTITY alu_cmp IS
           w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 END alu_cmp;
 
+-- F          OP = 11       OP = 10                OP = 01                  OP = 00
+-------- ------------ ------------- ---------------------- ------------------------
+-- 000         MUL           Y             CMPLT(X, Y)             AND(X, Y)
+-- 001         MULH   MOVHI = Y & LOW(X)   CMPLE(X, Y)             OR(X, Y)
+-- 010         MULHU        ---               ---                  XOR(X,Y)
+-- 011         ---          ---            CMPEQ(X, Y)             NOT(X)
+-- 100         DIV          ---            CMPLTU(X, Y)            ADD(X, Y)
+-- 101         DIVU         ---            CMPLEU(X, Y)            SUB(X, Y)
+-- 110         ---          ---            ---                     SHA(X ,Y)
+-- 111         ---          ---            ---                     SHL(X, Y)
+
+
 ARCHITECTURE Structure OF alu_cmp IS
 
+	constant F_CMPLT: std_logic_vector(2 downto 0) := "000";
+	constant F_CMPLE: std_logic_vector(2 downto 0) := "001";
+	constant F_CMPEQ: std_logic_vector(2 downto 0) := "011";
+	constant F_CMPLTU: std_logic_vector(2 downto 0) := "100";
+	constant F_CMPLEU: std_logic_vector(2 downto 0) := "101";
+
+	signal cmplt_w:  std_logic;
+	signal cmple_w:  std_logic;
+	signal cmpeq_w:  std_logic;
+	signal cmpltu_w: std_logic;
+	signal cmpleu_w: std_logic;
+	
+	function boolean_to_std_logic(bool: boolean) return std_logic is
+	begin
+		if bool then
+			return '1';
+		else
+			return '0';
+		end if;
+	end function boolean_to_std_logic;	
+	
 BEGIN
-	w <= x;
+	
+	cmplt_w  <= boolean_to_std_logic(signed(x) < signed(y));
+	cmple_w  <= boolean_to_std_logic(signed(x) <= signed(y));
+	cmpeq_w  <= boolean_to_std_logic(signed(x) = signed(y));
+	cmpltu_w <= boolean_to_std_logic(unsigned(x) < unsigned(y));
+	cmpleu_w <= boolean_to_std_logic(unsigned(x) <= unsigned(y));
+	
+	with func select
+		w <=
+			(15 downto 1 => '0') & cmplt_w  when F_CMPLT,
+			(15 downto 1 => '0') & cmple_w  when F_CMPLE,
+			(15 downto 1 => '0') & cmpeq_w  when F_CMPEQ,
+			(15 downto 1 => '0') & cmpltu_w when F_CMPLTU,
+			(15 downto 1 => '0') & cmpleu_w when F_CMPLEU,
+			(others => 'X') when others;
+	
 END Structure;
