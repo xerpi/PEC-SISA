@@ -23,7 +23,9 @@ END control_l;
 
 ARCHITECTURE Structure OF control_l IS
 
-signal agregate_in: std_logic_vector(4 downto 0);
+	signal agregate_in: std_logic_vector(4 downto 0);
+	signal func_mov: std_logic_vector(2 downto 0);
+	signal func_mem: std_logic_vector(2 downto 0);
 
 BEGIN
 
@@ -37,11 +39,21 @@ BEGIN
 			"11" when others; --MULT_DIV
 
 	-- cambiar op
+
 	agregate_in <= ir(15 downto 12) & ir(8);
+
 	with agregate_in select
-		func <=
+		func_mov <=
 			"000" when MOV & '0',
 			"001" when MOV & '1',
+			"000" when others;
+
+	func_mem <= "100"; --ALU ADD when memory instruction
+
+	with ir(15 downto 12) select
+		func <=
+			func_mov when MOV, --MOV and MOVHI
+			func_mem when LOAD | LOAD_BYTE | STORE | STORE_BYTE,
 			ir(5 downto 3) when others;
 
 	with ir(15 downto 12) select
