@@ -27,18 +27,27 @@ ARCHITECTURE Structure OF alu_muldiv IS
 	constant F_MULHU: std_logic_vector(2 downto 0) := "010";
 	constant F_DIV:   std_logic_vector(2 downto 0) := "100";
 	constant F_DIVU:  std_logic_vector(2 downto 0) := "101";
-	
+
+	signal dividend: std_logic_vector(15 downto 0);
+
 	signal mul32s: std_logic_vector(31 downto 0);
 	signal mul32u: std_logic_vector(31 downto 0);
 	signal div_s: std_logic_vector(15 downto 0);
 	signal div_u: std_logic_vector(15 downto 0);
 BEGIN
 
+	--Avoid division by zero (temp fix)
+	with y select
+		dividend <=
+			(15 downto 1 => '0') & '1' when X"0000",
+			y when others;
+
+
 	mul32s <= std_logic_vector(signed(x) * signed(y));
 	mul32u <= std_logic_vector(unsigned(x) * unsigned(y));
-	
-	div_s <= std_logic_vector(signed(x) / signed(y));
-	div_u <= std_logic_vector(unsigned(x) / unsigned(y));
+
+	div_s <= std_logic_vector(signed(x) / signed(dividend));
+	div_u <= std_logic_vector(unsigned(x) / unsigned(dividend));
 
 	with func select
 		w <=
