@@ -2,8 +2,6 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 
-use work.opcodes.all;
-
 ENTITY datapath IS
     PORT (clk      : IN  STD_LOGIC;
           op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
@@ -17,7 +15,7 @@ ENTITY datapath IS
           datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
           ins_dad  : IN  STD_LOGIC;
           pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-          in_d     : IN  STD_LOGIC;
+          in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
           alu_immed: IN  STD_LOGIC;
           addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
@@ -47,23 +45,25 @@ ARCHITECTURE Structure OF datapath IS
                   y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
                   op   : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
                   func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-                  w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+                  w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+                  z    : OUT STD_LOGIC);
 	END COMPONENT;
 
 	signal alu0_w: std_logic_vector(15 downto 0);
 	signal reg0_a: std_logic_vector(15 downto 0);
 	signal reg0_b: std_logic_vector(15 downto 0);
 
-	signal in_d_out: std_logic_vector(15 downto 0);
+	signal reg_d_in: std_logic_vector(15 downto 0);
 	signal immed_x2_out: std_logic_vector(15 downto 0);
 	signal addr_m_out: std_logic_vector(15 downto 0);
 	signal alu_y_in: std_logic_vector(15 downto 0);
 BEGIN
 
 	with in_d select
-		in_d_out <=
-			alu0_w when '0',
-			datard_m when '1',
+		reg_d_in <=
+			alu0_w when "00",
+			datard_m when "01",
+			pc when "10",
 			(others => '0') when others;
 
 	with immed_x2 select
@@ -91,7 +91,7 @@ BEGIN
 	reg0: regfile port map(
 		clk    => clk,
 		wrd    => wrd,
-		d      => in_d_out,
+		d      => reg_d_in,
 		addr_a => addr_a,
 		addr_b => addr_b,
 		addr_d => addr_d,
@@ -107,6 +107,7 @@ BEGIN
 		op => op,
 		func => func,
 		w  => alu0_w
+		--z =>
 	);
 
 	addr_m <= addr_m_out;

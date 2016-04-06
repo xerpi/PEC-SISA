@@ -16,18 +16,22 @@ ENTITY control_l IS
           addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
           immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           wr_m      : OUT STD_LOGIC;
-          in_d      : OUT STD_LOGIC;
+          in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
           immed_x2  : OUT STD_LOGIC;
           word_byte : OUT STD_LOGIC;
           alu_immed : OUT STD_LOGIC);
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
+	constant F_JAL:   std_logic_vector(2 downto 0) := "100";
 
 	signal opcode: std_logic_vector(3 downto 0);
+	signal func_out: std_logic_vector(2 downto 0);
 
 	signal agregate_in: std_logic_vector(4 downto 0);
 	signal func_mov: std_logic_vector(2 downto 0);
+	signal wrd_0: std_logic;
+	signal opcode_func: std_logic_vector(6 downto 0);
 
 BEGIN
 
@@ -53,9 +57,10 @@ BEGIN
 			"000" when others;
 
 	with opcode select
-		func <=
+		func_out <=
 			func_mov when MOV, --MOV and MOVHI
 			"100" when LOAD | LOAD_BYTE | STORE | STORE_BYTE, --ALU ADD when memory instruction
+			ir(2 downto 0) when ABSOLUTE_JUMP,
 			ir(5 downto 3) when others;
 
 	with opcode select
@@ -64,11 +69,18 @@ BEGIN
 			'1' when others;
 
 	with opcode select
-		wrd <=
+		wrd_0 <=
 			'0' when
 				STORE | STORE_BYTE | RELATIVE_JUMP | ABSOLUTE_JUMP | SPECIAL, --Only HALT of special
 			'1' when
 				others;
+
+	opcode_func <= opcode & func_out;
+
+	with opcode_func select
+		wrd <=
+			'1' when ABSOLUTE_JUMP & F_JAL, --enable regfile write permission when JAL
+			wrd_0 when others;
 
 	with opcode select
 		addr_a <=
@@ -107,10 +119,9 @@ BEGIN
 
 	with opcode select
 		in_d <=
-			'1' when LOAD,
-			'1' when LOAD_BYTE,
-			'0' when others;
-
+			"10" when ABSOLUTE_JUMP, --coming from new PC (only JAL)
+			"01" when LOAD | LOAD_BYTE, --coming from MEM
+			"00" when others; --coming from ALU
 
 	with opcode select
 		immed_x2 <=
@@ -130,5 +141,7 @@ BEGIN
 				ADDI | LOAD | STORE | MOV | LOAD_BYTE | STORE_BYTE | RELATIVE_JUMP,
 			'0' when
 				others;
+
+	func <= func_out;
 
 END Structure;

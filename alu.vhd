@@ -7,7 +7,8 @@ ENTITY alu IS
           y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
           op   : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
           func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-          w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+          w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+          z    : OUT STD_LOGIC);
 END alu;
 
 ARCHITECTURE Structure OF alu IS
@@ -31,7 +32,7 @@ ARCHITECTURE Structure OF alu IS
 	          func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 	          w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 	END COMPONENT;
-	
+
 	COMPONENT alu_muldiv IS
 		 PORT (x    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 				 y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -43,6 +44,7 @@ ARCHITECTURE Structure OF alu IS
 	signal cmp0_w : std_logic_vector(15 downto 0);
 	signal al0_w  : std_logic_vector(15 downto 0);
 	signal muldiv0_w  : std_logic_vector(15 downto 0);
+	signal alu_w : std_logic_vector(15 downto 0);
 
 BEGIN
 
@@ -66,7 +68,7 @@ BEGIN
 		func => func,
 		w    => al0_w
 	);
-	
+
 	muldiv0: alu_muldiv port map(
 		x    => x,
 		y    => y,
@@ -75,10 +77,17 @@ BEGIN
 	);
 
 	with op select
-		w <=
+		alu_w <=
 			al0_w when "00",
 			cmp0_w when "01",
 			muldiv0_w when "11",
 			misc0_w when others;
+
+	with unsigned(alu_w) = 0 select
+		z <=
+			'1' when true,
+			'0' when others;
+
+	w <= alu_w;
 
 END Structure;
