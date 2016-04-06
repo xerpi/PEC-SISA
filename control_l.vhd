@@ -18,20 +18,24 @@ ENTITY control_l IS
           wr_m      : OUT STD_LOGIC;
           in_d      : OUT STD_LOGIC;
           immed_x2  : OUT STD_LOGIC;
-          word_byte : OUT STD_LOGIC);
+          word_byte : OUT STD_LOGIC;
+          alu_immed : OUT STD_LOGIC);
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
 
+	signal opcode: std_logic_vector(3 downto 0);
+
 	signal agregate_in: std_logic_vector(4 downto 0);
 	signal func_mov: std_logic_vector(2 downto 0);
-	signal func_mem: std_logic_vector(2 downto 0);
 
 BEGIN
 
 	-- Aqui iria la generacion de las senales de control del datapath
 
-	with ir(15 downto 12) select
+	opcode <= ir(15 downto 12);
+
+	with opcode select
 		op <=
 			"00" when ARIT_LOGIC | LOAD | LOAD_BYTE | STORE | STORE_BYTE,
 			"01" when COMPARE,
@@ -40,7 +44,7 @@ BEGIN
 
 	-- cambiar op
 
-	agregate_in <= ir(15 downto 12) & ir(8);
+	agregate_in <= opcode & ir(8);
 
 	with agregate_in select
 		func_mov <=
@@ -48,39 +52,43 @@ BEGIN
 			"001" when MOV & '1',
 			"000" when others;
 
-	func_mem <= "100"; --ALU ADD when memory instruction
-
-	with ir(15 downto 12) select
+	with opcode select
 		func <=
 			func_mov when MOV, --MOV and MOVHI
-			func_mem when LOAD | LOAD_BYTE | STORE | STORE_BYTE,
+			"100" when LOAD | LOAD_BYTE | STORE | STORE_BYTE, --ALU ADD when memory instruction
 			ir(5 downto 3) when others;
 
-	with ir(15 downto 12) select
+	with opcode select
 		ldpc <=
 			'0' when SPECIAL, -- For now only HALT
 			'1' when others;
 
-	with ir(15 downto 12) select
+	with opcode select
 		wrd <=
-			'1' when LOAD,
-			'1' when LOAD_BYTE,
-			'1' when MOV,
-			'0' when others;
+			'0' when
+				STORE | STORE_BYTE | RELATIVE_JUMP | ABSOLUTE_JUMP | SPECIAL, --Only HALT of special
+			'1' when
+				others;
 
-	with ir(15 downto 12) select
+	with opcode select
 		addr_a <=
-			ir(8 downto 6) when LOAD,
-			ir(8 downto 6) when STORE,
-			ir(8 downto 6) when LOAD_BYTE,
-			ir(8 downto 6) when STORE_BYTE,
+			ir(8 downto 6) when
+				ARIT_LOGIC | COMPARE | ADDI | LOAD | STORE | MULT_DIV | ABSOLUTE_JUMP | LOAD_BYTE | STORE_BYTE | SPECIAL,
+			ir(11 downto 9) when
+				MOV,
 			ir(11 downto 9) when others;
 
-	addr_b <= ir(11 downto 9);
+	with opcode select
+		addr_b <=
+			ir(2 downto 0) when
+				ARIT_LOGIC | COMPARE | MULT_DIV,
+			ir(11 downto 9) when
+				STORE | RELATIVE_JUMP | IN_OUT | ABSOLUTE_JUMP | STORE_BYTE | SPECIAL,
+			ir(11 downto 9) when others;
+
 	addr_d <= ir(11 downto 9);
 
-
-	with ir(15 downto 12) select
+	with opcode select
 		immed <=
 			std_logic_vector(resize(signed(ir(7 downto 0)), immed'length)) when MOV,
 			std_logic_vector(resize(signed(ir(5 downto 0)), immed'length)) when LOAD,
@@ -91,29 +99,36 @@ BEGIN
 
 	--immed <= std_logic_vector(resize(signed(ir(7 downto 0)), immed'length));
 
-	with ir(15 downto 12) select
+	with opcode select
 		wr_m <=
 			'1' when STORE,
 			'1' when STORE_BYTE,
 			'0' when others;
 
-	with ir(15 downto 12) select
+	with opcode select
 		in_d <=
 			'1' when LOAD,
 			'1' when LOAD_BYTE,
 			'0' when others;
 
 
-	with ir(15 downto 12) select
+	with opcode select
 		immed_x2 <=
 			'1' when LOAD,
 			'1' when STORE,
 			'0' when others;
 
-	with ir(15 downto 12) select
+	with opcode select
 		word_byte <=
 			'1' when LOAD_BYTE,
 			'1' when STORE_BYTE,
 			'0' when others;
+
+	with opcode select
+		alu_immed <=
+			'1' when
+				ADDI | LOAD | STORE | MOV | LOAD_BYTE | STORE_BYTE | RELATIVE_JUMP,
+			'0' when
+				others;
 
 END Structure;

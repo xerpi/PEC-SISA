@@ -2,6 +2,8 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 
+use work.opcodes.all;
+
 ENTITY datapath IS
     PORT (clk      : IN  STD_LOGIC;
           op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
@@ -16,6 +18,7 @@ ENTITY datapath IS
           ins_dad  : IN  STD_LOGIC;
           pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
           in_d     : IN  STD_LOGIC;
+          alu_immed: IN  STD_LOGIC;
           addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 END datapath;
@@ -49,11 +52,12 @@ ARCHITECTURE Structure OF datapath IS
 
 	signal alu0_w: std_logic_vector(15 downto 0);
 	signal reg0_a: std_logic_vector(15 downto 0);
+	signal reg0_b: std_logic_vector(15 downto 0);
 
 	signal in_d_out: std_logic_vector(15 downto 0);
 	signal immed_x2_out: std_logic_vector(15 downto 0);
 	signal addr_m_out: std_logic_vector(15 downto 0);
-
+	signal alu_y_in: std_logic_vector(15 downto 0);
 BEGIN
 
 	with in_d select
@@ -75,6 +79,12 @@ BEGIN
 			(others => '0') when others;
 
 
+	with alu_immed select
+		alu_y_in <=
+			immed_x2_out when '1',
+			reg0_b when others;
+
+
 	 -- Aqui iria la declaracion del "mapeo" (PORT MAP) de los nombres de las entradas/salidas de los componentes
 	 -- En los esquemas de la documentacion a la instancia del banco de registros le hemos llamado reg0 y a la de la alu le hemos llamado alu0
 
@@ -86,12 +96,14 @@ BEGIN
 		addr_b => addr_b,
 		addr_d => addr_d,
 		a      => reg0_a,
-		b      => data_wr
+		b      => reg0_b
 	);
+
+	data_wr <= reg0_b;
 
 	alu0: alu port map(
 		x  => reg0_a,
-		y  => immed_x2_out,
+		y  => alu_y_in,
 		op => op,
 		func => func,
 		w  => alu0_w
