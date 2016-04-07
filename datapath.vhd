@@ -11,14 +11,15 @@ ENTITY datapath IS
           addr_b   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
           addr_d   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
           immed    : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-          immed_x2 : IN  STD_LOGIC;
           datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
           ins_dad  : IN  STD_LOGIC;
           pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
           in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
           alu_immed: IN  STD_LOGIC;
           addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-          data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+          data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  alu_z    : OUT STD_LOGIC;
+		  reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 END datapath;
 
 ARCHITECTURE Structure OF datapath IS
@@ -54,7 +55,6 @@ ARCHITECTURE Structure OF datapath IS
 	signal reg0_b: std_logic_vector(15 downto 0);
 
 	signal reg_d_in: std_logic_vector(15 downto 0);
-	signal immed_x2_out: std_logic_vector(15 downto 0);
 	signal addr_m_out: std_logic_vector(15 downto 0);
 	signal alu_y_in: std_logic_vector(15 downto 0);
 BEGIN
@@ -66,12 +66,6 @@ BEGIN
 			pc when "10",
 			(others => '0') when others;
 
-	with immed_x2 select
-		immed_x2_out <=
-			immed when '0',
-			immed(14 downto 0) & '0' when '1',
-			(others => '0') when others;
-
 	with ins_dad select
 		addr_m_out <=
 			alu0_w when '1',
@@ -81,7 +75,7 @@ BEGIN
 
 	with alu_immed select
 		alu_y_in <=
-			immed_x2_out when '1',
+			immed when '1',
 			reg0_b when others;
 
 
@@ -102,14 +96,15 @@ BEGIN
 	data_wr <= reg0_b;
 
 	alu0: alu port map(
-		x  => reg0_a,
-		y  => alu_y_in,
-		op => op,
+		x    => reg0_a,
+		y    => alu_y_in,
+		op   => op,
 		func => func,
-		w  => alu0_w
-		--z =>
+		w    => alu0_w,
+		z    => alu_z
 	);
 
 	addr_m <= addr_m_out;
+	reg_a <= reg0_a;
 
 END Structure;

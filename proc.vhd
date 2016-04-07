@@ -31,10 +31,11 @@ ARCHITECTURE Structure OF proc IS
 				pc        : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 				ins_dad   : OUT STD_LOGIC;
 				in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-				immed_x2  : OUT STD_LOGIC;
 				wr_m      : OUT STD_LOGIC;
 				word_byte : OUT STD_LOGIC;
-				alu_immed : OUT STD_LOGIC);
+				alu_immed : OUT STD_LOGIC;
+				alu_z     : IN STD_LOGIC;
+				reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0));
 	END COMPONENT;
 
 	COMPONENT datapath IS
@@ -46,14 +47,15 @@ ARCHITECTURE Structure OF proc IS
 				addr_b   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 				addr_d   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 				immed    : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				immed_x2 : IN  STD_LOGIC;
 				datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 				ins_dad  : IN  STD_LOGIC;
 				pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 				in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
 				alu_immed: IN  STD_LOGIC;
 				addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-				data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+				data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+				alu_z    : OUT STD_LOGIC;
+				reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 	END COMPONENT;
 
 	signal uc0_op: std_logic_vector(1 downto 0);
@@ -66,8 +68,10 @@ ARCHITECTURE Structure OF proc IS
 	signal uc0_pc: std_logic_vector(15 downto 0);
 	signal uc0_ins_dad: std_logic;
 	signal uc0_in_d: std_logic_vector(1 downto 0);
-	signal uc0_immed_x2: std_logic;
 	signal uc0_alu_immed: std_logic;
+
+	signal dp0_alu_z: std_logic;
+	signal dp0_reg_a: std_logic_vector(15 downto 0);
 
 BEGIN
 
@@ -88,10 +92,11 @@ BEGIN
 		pc => uc0_pc,
 		ins_dad => uc0_ins_dad,
 		in_d => uc0_in_d,
-		immed_x2 => uc0_immed_x2,
 		wr_m => wr_m,
 		word_byte => word_byte,
-		alu_immed => uc0_alu_immed
+		alu_immed => uc0_alu_immed,
+		alu_z => dp0_alu_z,
+		reg_a => dp0_reg_a
 	);
 
 	dp0: datapath port map(
@@ -103,14 +108,15 @@ BEGIN
 		addr_b => uc0_addr_b,
 		addr_d => uc0_addr_d,
 		immed => uc0_immed,
-		immed_x2 => uc0_immed_x2,
 		datard_m => datard_m,
 		ins_dad => uc0_ins_dad,
 		pc => uc0_pc,
 		in_d => uc0_in_d,
 		addr_m => addr_m,
 		data_wr => data_wr,
-		alu_immed => uc0_alu_immed
+		alu_immed => uc0_alu_immed,
+		alu_z => dp0_alu_z,
+		reg_a => dp0_reg_a
 	);
 
 END Structure;

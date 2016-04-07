@@ -17,10 +17,11 @@ ENTITY unidad_control IS
           pc        : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           ins_dad   : OUT STD_LOGIC;
           in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-          immed_x2  : OUT STD_LOGIC;
           wr_m      : OUT STD_LOGIC;
           word_byte : OUT STD_LOGIC;
-          alu_immed : OUT STD_LOGIC);
+          alu_immed : OUT STD_LOGIC;
+		  alu_z     : IN STD_LOGIC;
+		  reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0));
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -42,9 +43,13 @@ ARCHITECTURE Structure OF unidad_control IS
 				immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 				wr_m      : OUT STD_LOGIC;
 				in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-				immed_x2  : OUT STD_LOGIC;
 				word_byte : OUT STD_LOGIC;
-				alu_immed : OUT STD_LOGIC);
+				-- ALU signals
+				alu_immed : OUT STD_LOGIC;
+				alu_z     : IN STD_LOGIC;
+				-- Jump signals
+				rel_jmp_tkn : OUT STD_LOGIC;
+				abs_jmp_tkn : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT multi is
@@ -68,14 +73,16 @@ ARCHITECTURE Structure OF unidad_control IS
 
 	--Wires
 	signal m0_ldpc: std_logic; --MUX selector {pc, pc + 2} HALT
-	signal new_pc_out0, new_pc_out1: std_logic_vector(15 downto 0);
+	signal new_pc_out0, new_pc_out1, new_pc_out2: std_logic_vector(15 downto 0);
 	signal ir_reg_out0, ir_reg_out1: std_logic_vector(15 downto 0);
 	signal c0_ldpc: std_logic;
 	signal c0_wrd: std_logic;
 	signal c0_wr_m: std_logic;
 	signal c0_word_byte: std_logic;
+	signal c0_immed: std_logic_vector(15 downto 0);
 	signal m0_ldir: std_logic;
 
+	signal tkn_jmp: std_logic_vector(1 downto 0);
 
 BEGIN
 
@@ -85,8 +92,8 @@ BEGIN
 
 	with m0_ldir select
 		ir_reg_out0 <=
-			ir_reg when '0',
-			datard_m when '1',
+			ir_reg when '0', --DEMW
+			datard_m when '1', --FETCH
 			(others => '0') when others;
 
 	with boot select
@@ -95,22 +102,30 @@ BEGIN
 			(others => '0') when '1', -- NOP
 			(others => '0') when others;
 
-	with m0_ldpc select
+	with tkn_jmp select
 		new_pc_out0 <=
-			new_pc + 2 when '1',
+			new_pc + 2 when "00",
+			c0_immed + reg_a when "01",
+			reg_a when "10",
+			(others => 'X') when others;
+
+
+	with m0_ldpc select
+		new_pc_out1 <=
+			new_pc_out0 when '1',
 			new_pc when '0',
 			(others => '0') when others;
 
 	with boot select
-		new_pc_out1 <=
-			new_pc_out0 when '0',
+		new_pc_out2 <=
+			new_pc_out1 when '0',
 			X"C000" when '1',
 			(others => '0') when others;
 
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			new_pc <= new_pc_out1;
+			new_pc <= new_pc_out2;
 			ir_reg <= ir_reg_out1;
 		end if;
 	end process;
@@ -124,12 +139,14 @@ BEGIN
 		addr_a => addr_a,
 		addr_b => addr_b,
 		addr_d => addr_d,
-		immed => immed,
+		immed => c0_immed,
 		wr_m => c0_wr_m,
 		in_d => in_d,
-		immed_x2 => immed_x2,
 		word_byte => c0_word_byte,
-		alu_immed => alu_immed
+		alu_immed => alu_immed,
+		alu_z => alu_z,
+		rel_jmp_tkn => tkn_jmp(0),
+		abs_jmp_tkn => tkn_jmp(1)
 	);
 
 	m0: multi port map(
@@ -147,6 +164,7 @@ BEGIN
 		word_byte => word_byte
 	);
 
+	immed <= c0_immed;
 	pc <= new_pc;
 
 END Structure;
