@@ -1,6 +1,5 @@
 OBJECTS = $(patsubst %.vhd, %.o, $(wildcard *.vhd))
 GHDLFLAGS = --ieee=synopsys
-OBJECTS-=opcodes.o
 # Program input. If not defined environment variable
 # it will be defined as test_sisa
 INPUT ?= test_sisa

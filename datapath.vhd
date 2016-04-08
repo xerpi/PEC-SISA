@@ -1,6 +1,9 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
+USE ieee.std_logic_unsigned.all;
+
+use work.constants.all;
 
 ENTITY datapath IS
     PORT (clk      : IN  STD_LOGIC;
@@ -18,8 +21,8 @@ ENTITY datapath IS
           alu_immed: IN  STD_LOGIC;
           addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-		  alu_z    : OUT STD_LOGIC;
-		  reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+	    alu_z    : OUT STD_LOGIC;
+	    reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 END datapath;
 
 ARCHITECTURE Structure OF datapath IS
@@ -61,9 +64,9 @@ BEGIN
 
 	with in_d select
 		reg_d_in <=
-			alu0_w when "00",
-			datard_m when "01",
-			pc when "10",
+			alu0_w when in_d_alu,
+			datard_m when in_d_mem,
+			pc + 2 when in_d_new_pc,
 			(others => '0') when others;
 
 	with ins_dad select
@@ -75,7 +78,7 @@ BEGIN
 
 	with alu_immed select
 		alu_y_in <=
-			immed when '1',
+			immed when alu_immed_immed,
 			reg0_b when others;
 
 
