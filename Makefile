@@ -7,18 +7,11 @@ INPUT ?= test_sisa
 # variable it will be defined as test_sisa
 STOP_TIME ?= 12000ns
 
-all: INPUT
+all:
+	ghdl -m $(GHDLFLAGS) $(INPUT)
 
-INPUT: $(OBJECTS)
-	ghdl -e $(GHDLFLAGS) $(INPUT)
-
-%.o: %.vhd
-	ghdl -a $(GHDLFLAGS) $^
-
-simul: INPUT
+simul: all
 	ghdl -r $(INPUT) --stop-time=$(STOP_TIME) --wave=$(INPUT).ghw
 
 clean:
-	rm -rf *.o
-	rm -rf $(INPUT)
-	rm -rf *.ghw
+	ghdl --clean
