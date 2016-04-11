@@ -329,6 +329,10 @@ set_location_assignment PIN_Y7 -to SRAM_LB_N
 set_location_assignment PIN_T8 -to SRAM_OE_N
 set_location_assignment PIN_W7 -to SRAM_UB_N
 set_location_assignment PIN_AA10 -to SRAM_WE_N
+set_global_assignment -name VHDL_FILE constants.vhd
+set_global_assignment -name VHDL_FILE control_l_mov.vhd
+set_global_assignment -name VHDL_FILE control_l_jmp.vhd
+set_global_assignment -name VHDL_FILE control_l_generic.vhd
 set_global_assignment -name VHDL_FILE alu_misc.vhd
 set_global_assignment -name VHDL_FILE alu_cmp.vhd
 set_global_assignment -name VHDL_FILE alu_al.vhd
