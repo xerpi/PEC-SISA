@@ -104,9 +104,9 @@ BEGIN
 
 	with tkn_jmp select
 		new_pc_out0 <=
-			new_pc + 2 when "00",
-			c0_immed + reg_a when "01",
-			reg_a when "10",
+			new_pc + 2 when "00", --SEC.IMPL
+			c0_immed + new_pc + 2 when "01", --REL
+			reg_a when "10", --ABS
 			(others => 'X') when others;
 
 

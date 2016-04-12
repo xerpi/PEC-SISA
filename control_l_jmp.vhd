@@ -48,7 +48,7 @@ BEGIN
 			wrd_in when others;
 
 
-	rel_jmp_tkn <= instr_rel_jmp and (not (ir(8) xor alu_z));
+	rel_jmp_tkn <= instr_rel_jmp and (ir(8) xor alu_z);
 	abs_jmp_tkn <= instr_abs_jmp and ((ir(0) xor alu_z) or ir(1) or ir(2));
 
 END Structure;
