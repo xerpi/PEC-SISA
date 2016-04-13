@@ -40,6 +40,7 @@ package constants is
 	constant in_d_alu            : std_logic_vector(1 downto 0) := B"00"; --coming from ALU
 	constant in_d_mem            : std_logic_vector(1 downto 0) := B"01"; --coming from MEM
 	constant in_d_new_pc         : std_logic_vector(1 downto 0) := B"10"; --coming from new PC (only JAL)
+	constant in_d_io             : std_logic_vector(1 downto 0) := B"11"; --coming from I/O port IN
 
 	constant word_byte_b         : std_logic := '1'; -- when LDB/STB
 	constant word_byte_w         : std_logic := '0'; -- when others

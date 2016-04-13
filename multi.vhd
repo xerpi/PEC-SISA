@@ -8,12 +8,14 @@ entity multi is
          wrd_1     : IN  STD_LOGIC;
          wr_m_1    : IN  STD_LOGIC;
          w_b       : IN  STD_LOGIC;
+         wr_out_1  : IN  STD_LOGIC;
          ldpc      : OUT STD_LOGIC;
          wrd       : OUT STD_LOGIC;
          wr_m      : OUT STD_LOGIC;
          ldir      : OUT STD_LOGIC;
          ins_dad   : OUT STD_LOGIC;
-         word_byte : OUT STD_LOGIC);
+         word_byte : OUT STD_LOGIC;
+         wr_out    : OUT STD_LOGIC);
 end entity;
 
 architecture Structure of multi is
@@ -21,8 +23,8 @@ architecture Structure of multi is
 	--constant DEMW: std_logic := '1';
 	--signal state: std_logic;
 
-      signal agregate_in: std_logic_vector(3 downto 0);
-      signal agregate_out: std_logic_vector(3 downto 0);
+      signal agregate_in: std_logic_vector(4 downto 0);
+      signal agregate_out: std_logic_vector(4 downto 0);
 	-- Aqui iria la declaracion de las los estados de la maquina de estados
 
 -- Build an enumerated type for the state machine
@@ -61,13 +63,14 @@ begin
 			'1' when DEMW,
 			'0' when others;
 
-	agregate_in <= wrd_1 & wr_m_1 & w_b & ldpc_1;
+	agregate_in <= wr_out_1 & wrd_1 & wr_m_1 & w_b & ldpc_1;
 
 	with state select
 		agregate_out <=
 			agregate_in when DEMW,
 			(others => '0') when others;
 
+	wr_out <= agregate_out(4);
 	wrd <= agregate_out(3);
 	wr_m <= agregate_out(2);
 	word_byte <= agregate_out(1);

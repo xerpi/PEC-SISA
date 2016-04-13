@@ -34,7 +34,7 @@ ARCHITECTURE Structure OF alu_cmp IS
 	signal cmpeq_w:  std_logic;
 	signal cmpltu_w: std_logic;
 	signal cmpleu_w: std_logic;
-	
+
 	function boolean_to_std_logic(bool: boolean) return std_logic is
 	begin
 		if bool then
@@ -42,16 +42,16 @@ ARCHITECTURE Structure OF alu_cmp IS
 		else
 			return '0';
 		end if;
-	end function boolean_to_std_logic;	
-	
+	end function boolean_to_std_logic;
+
 BEGIN
-	
+
 	cmplt_w  <= boolean_to_std_logic(signed(x) < signed(y));
 	cmple_w  <= boolean_to_std_logic(signed(x) <= signed(y));
 	cmpeq_w  <= boolean_to_std_logic(signed(x) = signed(y));
 	cmpltu_w <= boolean_to_std_logic(unsigned(x) < unsigned(y));
 	cmpleu_w <= boolean_to_std_logic(unsigned(x) <= unsigned(y));
-	
+
 	with func select
 		w <=
 			(15 downto 1 => '0') & cmplt_w  when F_CMPLT,
@@ -60,5 +60,5 @@ BEGIN
 			(15 downto 1 => '0') & cmpltu_w when F_CMPLTU,
 			(15 downto 1 => '0') & cmpleu_w when F_CMPLEU,
 			(others => 'X') when others;
-	
+
 END Structure;

@@ -7,7 +7,7 @@ use work.opcodes.all;
 use work.constants.all;
 
 ENTITY control_l IS
-    PORT (ir            : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	PORT (ir            : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 		op          : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 		func        : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		ldpc        : OUT STD_LOGIC;
@@ -24,7 +24,10 @@ ENTITY control_l IS
 		alu_z       : IN STD_LOGIC;
 		-- Jump signals
 		rel_jmp_tkn : OUT STD_LOGIC;
-		abs_jmp_tkn : OUT STD_LOGIC);
+		abs_jmp_tkn : OUT STD_LOGIC;
+		-- I/O signals
+		wr_out      : OUT STD_LOGIC;
+		rd_in       : OUT STD_LOGIC);
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
@@ -47,6 +50,10 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_jmp_wrd         : std_logic;
 	signal c0_jmp_rel_jmp_tkn : std_logic;
 	signal c0_jmp_abs_jmp_tkn : std_logic;
+
+	signal c0_io_wrd          : std_logic;
+	signal c0_io_wr_out       : std_logic;
+	signal c0_io_rd_in        : std_logic;
 
 	signal opcode             : std_logic_vector(3 downto 0);
 
@@ -79,6 +86,14 @@ ARCHITECTURE Structure OF control_l IS
 			wrd_out    : OUT STD_LOGIC;
 			rel_jmp_tkn: OUT STD_LOGIC;
 			abs_jmp_tkn: OUT STD_LOGIC);
+	END COMPONENT;
+
+	COMPONENT control_l_io IS
+	    PORT (ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  wrd_in     : IN STD_LOGIC;
+		  wrd_out    : OUT STD_LOGIC;
+		  wr_out     : OUT STD_LOGIC;
+		  rd_in      : OUT STD_LOGIC);
 	END COMPONENT;
 
 
@@ -116,6 +131,14 @@ BEGIN
 		abs_jmp_tkn => c0_jmp_abs_jmp_tkn
 	);
 
+	c0_io: control_l_io port map(
+		ir => ir,
+		wrd_in => c0_jmp_wrd,
+		wrd_out => c0_io_wrd,
+		wr_out => c0_io_wr_out,
+		rd_in => c0_io_rd_in
+	);
+
 
 	op <= c0_g_op;
 	ldpc <= c0_g_ldpc;
@@ -130,8 +153,11 @@ BEGIN
 
 	func <= c0_mov_func;
 
-	wrd <= c0_jmp_wrd;
+	wrd <= c0_io_wrd;
 	rel_jmp_tkn <= c0_jmp_rel_jmp_tkn;
 	abs_jmp_tkn <= c0_jmp_abs_jmp_tkn;
+
+	wr_out <= c0_io_wr_out;
+	rd_in <= c0_io_rd_in;
 
 END Structure;

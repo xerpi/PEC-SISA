@@ -11,7 +11,7 @@ ENTITY control_l_jmp IS
     PORT (ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
     	    alu_z      : IN STD_LOGIC;
     	    wrd_in     : IN STD_LOGIC;
-          wrd_out    : OUT STD_LOGIC;
+            wrd_out    : OUT STD_LOGIC;
 	    rel_jmp_tkn: OUT STD_LOGIC;
 	    abs_jmp_tkn: OUT STD_LOGIC);
 END control_l_jmp;

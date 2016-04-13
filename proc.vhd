@@ -8,7 +8,12 @@ ENTITY proc IS
           addr_m    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           data_wr   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           wr_m      : OUT STD_LOGIC;
-          word_byte : OUT STD_LOGIC);
+          word_byte : OUT STD_LOGIC;
+	  addr_io   : OUT STD_LOGIC_VECTOR(7 downto 0);
+	  wr_io     : OUT STD_LOGIC_VECTOR(15 downto 0);
+	  rd_io     : IN STD_LOGIC_VECTOR(15 downto 0);
+	  wr_out    : OUT STD_LOGIC;
+	  rd_in     : OUT STD_LOGIC);
 END proc;
 
 ARCHITECTURE Structure OF proc IS
@@ -19,43 +24,47 @@ ARCHITECTURE Structure OF proc IS
 
 	COMPONENT unidad_control IS
 		 PORT (boot      : IN  STD_LOGIC;
-				clk       : IN  STD_LOGIC;
-				datard_m  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-				func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-				wrd       : OUT STD_LOGIC;
-				addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-				addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-				addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-				immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-				pc        : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-				ins_dad   : OUT STD_LOGIC;
-				in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-				wr_m      : OUT STD_LOGIC;
-				word_byte : OUT STD_LOGIC;
-				alu_immed : OUT STD_LOGIC;
-				alu_z     : IN STD_LOGIC;
-				reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0));
+			clk       : IN  STD_LOGIC;
+			datard_m  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+			op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+			func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			wrd       : OUT STD_LOGIC;
+			addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			pc        : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			ins_dad   : OUT STD_LOGIC;
+			in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+			wr_m      : OUT STD_LOGIC;
+			word_byte : OUT STD_LOGIC;
+			alu_immed : OUT STD_LOGIC;
+			alu_z     : IN STD_LOGIC;
+			reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+			wr_out    : OUT STD_LOGIC;
+			rd_in     : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT datapath IS
 		 PORT (clk      : IN  STD_LOGIC;
-				op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
-				func     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-				wrd      : IN  STD_LOGIC;
-				addr_a   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-				addr_b   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-				addr_d   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-				immed    : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				ins_dad  : IN  STD_LOGIC;
-				pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
-				alu_immed: IN  STD_LOGIC;
-				addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-				data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-				alu_z    : OUT STD_LOGIC;
-				reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+			op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
+			func     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+			wrd      : IN  STD_LOGIC;
+			addr_a   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+			addr_b   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+			addr_d   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+			immed    : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+			datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+			ins_dad  : IN  STD_LOGIC;
+			pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+			in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
+			alu_immed: IN  STD_LOGIC;
+			addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			alu_z    : OUT STD_LOGIC;
+			reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			wr_io    : OUT STD_LOGIC_VECTOR(15 downto 0);
+			rd_io    : IN  STD_LOGIC_VECTOR(15 downto 0));
 	END COMPONENT;
 
 	signal uc0_op: std_logic_vector(1 downto 0);
@@ -96,7 +105,9 @@ BEGIN
 		word_byte => word_byte,
 		alu_immed => uc0_alu_immed,
 		alu_z => dp0_alu_z,
-		reg_a => dp0_reg_a
+		reg_a => dp0_reg_a,
+		wr_out => wr_out,
+		rd_in => rd_in
 	);
 
 	dp0: datapath port map(
@@ -116,7 +127,11 @@ BEGIN
 		data_wr => data_wr,
 		alu_immed => uc0_alu_immed,
 		alu_z => dp0_alu_z,
-		reg_a => dp0_reg_a
+		reg_a => dp0_reg_a,
+		wr_io => wr_io,
+		rd_io => rd_io
 	);
+
+	addr_io <= uc0_immed(7 downto 0);
 
 END Structure;

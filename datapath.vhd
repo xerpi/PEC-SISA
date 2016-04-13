@@ -21,8 +21,10 @@ ENTITY datapath IS
           alu_immed: IN  STD_LOGIC;
           addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-	    alu_z    : OUT STD_LOGIC;
-	    reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+	  alu_z    : OUT STD_LOGIC;
+	  reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+	  wr_io    : OUT STD_LOGIC_VECTOR(15 downto 0);
+	  rd_io    : IN  STD_LOGIC_VECTOR(15 downto 0));
 END datapath;
 
 ARCHITECTURE Structure OF datapath IS
@@ -67,6 +69,7 @@ BEGIN
 			alu0_w when in_d_alu,
 			datard_m when in_d_mem,
 			pc + 2 when in_d_new_pc,
+			rd_io when in_d_io,
 			(others => '0') when others;
 
 	with ins_dad select
@@ -109,5 +112,6 @@ BEGIN
 
 	addr_m <= addr_m_out;
 	reg_a <= reg0_a;
+	wr_io <= reg0_b;
 
 END Structure;

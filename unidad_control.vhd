@@ -20,8 +20,10 @@ ENTITY unidad_control IS
           wr_m      : OUT STD_LOGIC;
           word_byte : OUT STD_LOGIC;
           alu_immed : OUT STD_LOGIC;
-		  alu_z     : IN STD_LOGIC;
-		  reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0));
+	  alu_z     : IN STD_LOGIC;
+	  reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	  wr_out    : OUT STD_LOGIC;
+	  rd_in     : OUT STD_LOGIC);
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -33,39 +35,44 @@ ARCHITECTURE Structure OF unidad_control IS
 
 	COMPONENT control_l IS
 		 PORT (ir        : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-				func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-				ldpc      : OUT STD_LOGIC;
-				wrd       : OUT STD_LOGIC;
-				addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-				addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-				addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-				immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-				wr_m      : OUT STD_LOGIC;
-				in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-				word_byte : OUT STD_LOGIC;
-				-- ALU signals
-				alu_immed : OUT STD_LOGIC;
-				alu_z     : IN STD_LOGIC;
-				-- Jump signals
-				rel_jmp_tkn : OUT STD_LOGIC;
-				abs_jmp_tkn : OUT STD_LOGIC);
+			op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+			func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			ldpc      : OUT STD_LOGIC;
+			wrd       : OUT STD_LOGIC;
+			addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+			immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			wr_m      : OUT STD_LOGIC;
+			in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+			word_byte : OUT STD_LOGIC;
+			-- ALU signals
+			alu_immed : OUT STD_LOGIC;
+			alu_z     : IN STD_LOGIC;
+			-- Jump signals
+			rel_jmp_tkn : OUT STD_LOGIC;
+			abs_jmp_tkn : OUT STD_LOGIC;
+			-- I/O signals
+			wr_out    : OUT STD_LOGIC;
+			rd_in     : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT multi is
-		 port(clk       : IN  STD_LOGIC;
-				boot      : IN  STD_LOGIC;
-				ldpc_1    : IN  STD_LOGIC;
-				wrd_1     : IN  STD_LOGIC;
-				wr_m_1    : IN  STD_LOGIC;
-				w_b       : IN  STD_LOGIC;
-				ldpc      : OUT STD_LOGIC;
-				wrd       : OUT STD_LOGIC;
-				wr_m      : OUT STD_LOGIC;
-				ldir      : OUT STD_LOGIC;
-				ins_dad   : OUT STD_LOGIC;
-				word_byte : OUT STD_LOGIC);
-	end COMPONENT;
+	    port(clk       : IN  STD_LOGIC;
+		 boot      : IN  STD_LOGIC;
+		 ldpc_1    : IN  STD_LOGIC;
+		 wrd_1     : IN  STD_LOGIC;
+		 wr_m_1    : IN  STD_LOGIC;
+		 w_b       : IN  STD_LOGIC;
+		 wr_out_1  : IN  STD_LOGIC;
+		 ldpc      : OUT STD_LOGIC;
+		 wrd       : OUT STD_LOGIC;
+		 wr_m      : OUT STD_LOGIC;
+		 ldir      : OUT STD_LOGIC;
+		 ins_dad   : OUT STD_LOGIC;
+		 word_byte : OUT STD_LOGIC;
+		 wr_out    : OUT STD_LOGIC);
+	END COMPONENT;
 
 	--Registers
 	signal new_pc: std_logic_vector(15 downto 0);
@@ -80,6 +87,7 @@ ARCHITECTURE Structure OF unidad_control IS
 	signal c0_wr_m: std_logic;
 	signal c0_word_byte: std_logic;
 	signal c0_immed: std_logic_vector(15 downto 0);
+	signal c0_wr_out: std_logic;
 	signal m0_ldir: std_logic;
 
 	signal tkn_jmp: std_logic_vector(1 downto 0);
@@ -146,7 +154,9 @@ BEGIN
 		alu_immed => alu_immed,
 		alu_z => alu_z,
 		rel_jmp_tkn => tkn_jmp(0),
-		abs_jmp_tkn => tkn_jmp(1)
+		abs_jmp_tkn => tkn_jmp(1),
+		wr_out => c0_wr_out,
+		rd_in => rd_in
 	);
 
 	m0: multi port map(
@@ -156,12 +166,14 @@ BEGIN
 		wrd_1 => c0_wrd,
 		wr_m_1 => c0_wr_m,
 		w_b => c0_word_byte,
+		wr_out_1 => c0_wr_out,
 		ldpc => m0_ldpc,
 		wrd => wrd,
 		wr_m => wr_m,
 		ldir => m0_ldir,
 		ins_dad => ins_dad,
-		word_byte => word_byte
+		word_byte => word_byte,
+		wr_out => wr_out
 	);
 
 	immed <= c0_immed;

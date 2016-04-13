@@ -28,7 +28,7 @@ ARCHITECTURE Structure OF alu_al IS
 	signal sub_w: std_logic_vector(15 downto 0);
 	signal sha_w: std_logic_vector(15 downto 0);
 	signal shl_w: std_logic_vector(15 downto 0);
-	
+
 	signal sh_l_w: std_logic_vector(15 downto 0);
 	signal sh_ra_w: std_logic_vector(15 downto 0);
 	signal sh_rl_w: std_logic_vector(15 downto 0);
@@ -40,7 +40,7 @@ BEGIN
 	not_w <= not x;
 	add_w <= std_logic_vector(unsigned(x) + unsigned(y));
 	sub_w <= std_logic_vector(unsigned(x) - unsigned(y));
-	
+
 	sh_l_w <= std_logic_vector(shift_left(unsigned(x), to_integer(abs(signed(y)))));
 	sh_ra_w <= std_logic_vector(shift_right(signed(x), to_integer(abs(signed(y)))));
 	sh_rl_w <= std_logic_vector(shift_right(unsigned(x), to_integer(abs(signed(y)))));
@@ -49,12 +49,12 @@ BEGIN
 		sha_w <=
 			sh_l_w when true,
 			sh_ra_w when others;
-			
+
 	with signed(y) >= 0 select
 		shl_w <=
 			sh_l_w when true,
 			sh_rl_w when others;
-	
+
 	with func select
 		w <=
 			and_w when F_AND,
@@ -66,5 +66,5 @@ BEGIN
 			sha_w when F_SHA,
 			shl_w when F_SHL,
 			(others => 'X') when others;
-			
+
 END Structure;
