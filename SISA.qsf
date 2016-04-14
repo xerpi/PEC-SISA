@@ -496,6 +496,9 @@ set_instance_assignment -name IO_STANDARD LVTTL -to AUD_DACLRCK
 set_instance_assignment -name IO_STANDARD LVTTL -to AUD_DACDAT
 set_instance_assignment -name IO_STANDARD LVTTL -to AUD_XCK
 set_instance_assignment -name IO_STANDARD LVTTL -to AUD_BCLK
+set_global_assignment -name VHDL_FILE ps2_keyboard.vhd
+set_global_assignment -name VHDL_FILE keyboard_controller.vhd
+set_global_assignment -name VHDL_FILE driver7Segmentos.vhd
 set_global_assignment -name VHDL_FILE controladores_IO.vhd
 set_global_assignment -name VHDL_FILE constants.vhd
 set_global_assignment -name VHDL_FILE control_l_mov.vhd

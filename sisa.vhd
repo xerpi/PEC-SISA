@@ -11,9 +11,16 @@ ENTITY sisa IS
           SRAM_CE_N : out   std_logic := '1';
           SRAM_OE_N : out   std_logic := '1';
           SRAM_WE_N : out   std_logic := '1';
-	  LEDG      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-	  LEDR      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-	  SW        : in std_logic_vector(9 downto 9));
+          LEDG      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+          LEDR      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+          HEX0      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+          HEX1      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+          HEX2      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+          HEX3      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+          SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+          KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+			 PS2_CLK   : inout std_logic; 
+			 PS2_DATA  : inout std_logic);
 END sisa;
 
 ARCHITECTURE Structure OF sisa IS
@@ -48,7 +55,15 @@ ARCHITECTURE Structure OF sisa IS
 		wr_out     : IN STD_LOGIC;
 		rd_in      : IN STD_LOGIC;
 		led_verdes : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-		led_rojos  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
+		led_rojos  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+		HEX0      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX1      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX2      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		HEX3      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+		SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+		KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+		ps2_clk : inout std_logic;
+		ps2_data : inout std_logic);
 	END COMPONENT;
 
 
@@ -121,7 +136,15 @@ BEGIN
 		wr_out => proc0_wr_out,
 		rd_in => proc0_rd_in,
 		led_verdes => LEDG,
-		led_rojos => LEDR
+		led_rojos => LEDR,
+		HEX0 => HEX0,
+		HEX1 => HEX1,
+		HEX2 => HEX2,
+		HEX3 => HEX3,
+		SW => SW,
+		KEY => KEY,
+		ps2_clk => PS2_CLK,
+		ps2_data => PS2_DATA
 	);
 
 	MemoryController0: MemoryController port map(
