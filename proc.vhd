@@ -2,18 +2,18 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 
 ENTITY proc IS
-    PORT (clk       : IN  STD_LOGIC;
-          boot      : IN  STD_LOGIC;
-          datard_m  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-          addr_m    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-          data_wr   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-          wr_m      : OUT STD_LOGIC;
-          word_byte : OUT STD_LOGIC;
-	  addr_io   : OUT STD_LOGIC_VECTOR(7 downto 0);
-	  wr_io     : OUT STD_LOGIC_VECTOR(15 downto 0);
-	  rd_io     : IN STD_LOGIC_VECTOR(15 downto 0);
-	  wr_out    : OUT STD_LOGIC;
-	  rd_in     : OUT STD_LOGIC);
+    PORT (clk      : IN  STD_LOGIC;
+			boot      : IN  STD_LOGIC;
+			datard_m  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+			addr_m    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			data_wr   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			wr_m      : OUT STD_LOGIC;
+			word_byte : OUT STD_LOGIC;
+			addr_io   : OUT STD_LOGIC_VECTOR(7 downto 0);
+			wr_io     : OUT STD_LOGIC_VECTOR(15 downto 0);
+			rd_io     : IN STD_LOGIC_VECTOR(15 downto 0);
+			wr_out    : OUT STD_LOGIC;
+			rd_in     : OUT STD_LOGIC);
 END proc;
 
 ARCHITECTURE Structure OF proc IS

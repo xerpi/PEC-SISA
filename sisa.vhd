@@ -4,6 +4,7 @@ USE ieee.std_logic_unsigned.all;
 
 ENTITY sisa IS
     PORT (CLOCK_50  : IN    STD_LOGIC;
+			 --SRAM
           SRAM_ADDR : out   std_logic_vector(17 downto 0);
           SRAM_DQ   : inout std_logic_vector(15 downto 0);
           SRAM_UB_N : out   std_logic;
@@ -11,6 +12,7 @@ ENTITY sisa IS
           SRAM_CE_N : out   std_logic := '1';
           SRAM_OE_N : out   std_logic := '1';
           SRAM_WE_N : out   std_logic := '1';
+			 --I/O
           LEDG      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
           LEDR      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
           HEX0      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
@@ -20,7 +22,13 @@ ENTITY sisa IS
           SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
           KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 			 PS2_CLK   : inout std_logic; 
-			 PS2_DATA  : inout std_logic);
+			 PS2_DATA  : inout std_logic;
+			 --VGA
+			 VGA_R		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+			 VGA_G		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+			 VGA_B		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+			 VGA_HS		: OUT STD_LOGIC;
+			 VGA_VS		: OUT STD_LOGIC);
 END sisa;
 
 ARCHITECTURE Structure OF sisa IS
@@ -66,7 +74,6 @@ ARCHITECTURE Structure OF sisa IS
 		ps2_data : inout std_logic);
 	END COMPONENT;
 
-
 	COMPONENT MemoryController is
 	PORT (CLOCK_50  : in  std_logic;
 		addr      : in  std_logic_vector(15 downto 0);
@@ -81,8 +88,34 @@ ARCHITECTURE Structure OF sisa IS
 		SRAM_LB_N : out   std_logic;
 		SRAM_CE_N : out   std_logic := '1';
 		SRAM_OE_N : out   std_logic := '1';
-		SRAM_WE_N : out   std_logic := '1');
+		SRAM_WE_N : out   std_logic := '1';
+		--VGA 
+		vga_addr    : out std_logic_vector(12 downto 0);
+		vga_we      : out std_logic;
+		vga_wr_data : out std_logic_vector(15 downto 0);
+		vga_rd_data : in std_logic_vector(15 downto 0);
+		vga_byte_m  : out std_logic);
 	END COMPONENT;
+
+	COMPONENT vga_controller IS
+	PORT(clk_50mhz      : in  std_logic; -- system clock signal
+         reset          : in  std_logic; -- system reset
+         blank_out      : out std_logic; -- vga control signal
+         csync_out      : out std_logic; -- vga control signal
+         red_out        : out std_logic_vector(7 downto 0); -- vga red pixel value
+         green_out      : out std_logic_vector(7 downto 0); -- vga green pixel value
+         blue_out       : out std_logic_vector(7 downto 0); -- vga blue pixel value
+         horiz_sync_out : out std_logic; -- vga control signal
+         vert_sync_out  : out std_logic; -- vga control signal
+         --
+         addr_vga          : in std_logic_vector(12 downto 0);
+         we                : in std_logic;
+         wr_data           : in std_logic_vector(15 downto 0);
+         rd_data           : out std_logic_vector(15 downto 0);
+         byte_m            : in std_logic;
+         vga_cursor        : in std_logic_vector(15 downto 0);  -- simplemente lo ignoramos, este controlador no lo tiene implementado
+         vga_cursor_enable : in std_logic);                     -- simplemente lo ignoramos, este controlador no lo tiene implementado
+	end COMPONENT;
 
 	signal proc0_word_byte: std_logic;
 	signal proc0_wr_m: std_logic;
@@ -95,7 +128,13 @@ ARCHITECTURE Structure OF sisa IS
 	signal proc0_rd_in: std_logic;
 	signal proc0_wr_out: std_logic;
 
-	signal MemoryController0_rd_data: std_logic_vector(15 downto 0);
+	signal mc0_rd_data     : std_logic_vector(15 downto 0);
+	signal mc0_vga_addr    : std_logic_vector(12 downto 0);
+	signal mc0_vga_we      : std_logic;
+	signal mc0_vga_wr_data : std_logic_vector(15 downto 0);
+	signal mc0_vga_byte_m  : std_logic;
+	
+	signal vc0_vga_rd_data : std_logic_vector(15 downto 0);
 
 	signal clock_625Mhz_signal: std_logic;
 
@@ -115,7 +154,7 @@ BEGIN
 	proc0: proc port map(
 		clk => clock_625Mhz_signal,
 		boot => boot,
-		datard_m => MemoryController0_rd_data,
+		datard_m => mc0_rd_data,
 		addr_m => proc0_addr_m,
 		data_wr => proc0_data_wr,
 		wr_m => proc0_wr_m,
@@ -147,7 +186,7 @@ BEGIN
 		ps2_data => PS2_DATA
 	);
 
-	MemoryController0: MemoryController port map(
+	mc0: MemoryController port map(
 		CLOCK_50 => CLOCK_50,
 		-- señales para la placa de desarrollo
 		SRAM_ADDR => SRAM_ADDR,
@@ -160,9 +199,33 @@ BEGIN
 		-- señales internas del procesador
 		addr => proc0_addr_m,
 		wr_data => proc0_data_wr,
-		rd_data => MemoryController0_rd_data,
+		rd_data => mc0_rd_data,
 		we => proc0_wr_m,
-		byte_m => proc0_word_byte
+		byte_m => proc0_word_byte,
+		--VGA 
+		vga_addr => mc0_vga_addr,
+		vga_we => mc0_vga_we,
+		vga_wr_data => mc0_vga_wr_data,
+		vga_rd_data => vc0_vga_rd_data,
+		vga_byte_m => mc0_vga_byte_m
+	);
+	
+	vc0: vga_controller port map(
+			clk_50mhz => CLOCK_50,
+         reset => boot,
+         red_out => VGA_R, 
+         green_out => VGA_G,
+         blue_out => VGA_B,
+         horiz_sync_out => VGA_HS,
+         vert_sync_out => VGA_VS,
+         --
+         addr_vga => mc0_vga_addr,
+         we => mc0_vga_we ,
+         wr_data => mc0_vga_wr_data,
+         rd_data => vc0_vga_rd_data,
+         byte_m => mc0_vga_byte_m,
+         vga_cursor => (others => '0'),
+         vga_cursor_enable => '0'    
 	);
 
 

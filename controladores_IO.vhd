@@ -31,7 +31,7 @@ ARCHITECTURE Structure OF controladores_IO IS
 	COMPONENT driver7Segmentos IS
 		PORT( codigoCaracter : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 			bitsCaracter : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
-			enable : std_logic);
+			enable : in std_logic);
 	END COMPONENT;
 	
 	COMPONENT keyboard_controller IS
@@ -106,7 +106,7 @@ BEGIN
 			"00000000" & kc0_read_char when X"0F",
 			"000000000000000" & kc0_data_ready when X"10",
 			io_ports(to_integer(unsigned(addr_io))) when others;
-			
+
 	kc0_clear_char <=
 		'1' when addr_io = X"10" and wr_out_new = '1' else
 		'0';

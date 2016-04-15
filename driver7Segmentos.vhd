@@ -3,7 +3,7 @@ USE ieee.std_logic_1164.all;
 ENTITY driver7Segmentos IS
 	PORT( codigoCaracter : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 	bitsCaracter : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
-	enable : std_logic);
+	enable : in std_logic);
 END driver7Segmentos;
 
 ARCHITECTURE Structure OF driver7Segmentos IS
