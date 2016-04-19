@@ -58,8 +58,8 @@ BEGIN
 			addr_a_8_dt_6  & addr_b_2_dt_0  & op_muldiv_unit & "XXX"         & func_sel_5_dt_3 & "XX"                 & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_alu   when MULT_DIV,
 
 			--Memory instructions
-			addr_a_8_dt_6  & 'X'            & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six_x2  & wrd_allow & wr_m_deny  & ldpc_continue & in_d_mem    & word_byte_b & alu_immed_immed when LOAD_BYTE,
-			addr_a_8_dt_6  & addr_b_11_dt_9 & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six_x2  & wrd_deny  & wr_m_allow & ldpc_continue & "XX"        & word_byte_b & alu_immed_immed when STORE_BYTE,
+			addr_a_8_dt_6  & 'X'            & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six     & wrd_allow & wr_m_deny  & ldpc_continue & in_d_mem    & word_byte_b & alu_immed_immed when LOAD_BYTE,
+			addr_a_8_dt_6  & addr_b_11_dt_9 & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six     & wrd_deny  & wr_m_allow & ldpc_continue & "XX"        & word_byte_b & alu_immed_immed when STORE_BYTE,
 
 			--Jump/branch instructions
 			'X'            & addr_b_11_dt_9 & op_misc_unit   & func_dec_mov  & func_sel_dec    & immed_sel_se_eight_x2 & wrd_deny & wr_m_deny  & ldpc_continue & "XX"        & 'X'         & alu_immed_alu   when RELATIVE_JUMP,
