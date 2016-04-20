@@ -74,7 +74,7 @@ begin
 		we;
 		
 	vga_we <=
-		'1' when addr >= X"A000" and addr < X"C000" else --VGA RAM
+		'1' when addr >= X"A000" and addr < X"C000" and we = '1' else --VGA RAM
 		'0';
 		
 	rd_data <=

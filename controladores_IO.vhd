@@ -1,6 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
+USE ieee.std_logic_unsigned.all;
 
 ENTITY controladores_IO IS
 	PORT (boot       : IN STD_LOGIC;
@@ -19,14 +20,15 @@ ENTITY controladores_IO IS
 		SW         : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
 		KEY        : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 		ps2_clk    : inout std_logic;
-		ps2_data   : inout std_logic);
+		ps2_data   : inout std_logic;
+		vga_cursor : out std_logic_vector(15 downto 0);
+		vga_cursor_enable : out std_logic);
 END controladores_IO;
 
 ARCHITECTURE Structure OF controladores_IO IS
 	--type IO_PORTS_T is array (255 downto 0) of std_logic_vector(15 downto 0);
 	type IO_PORTS_T is array (21 downto 0) of std_logic_vector(15 downto 0);
 	signal io_ports: IO_PORTS_T := (others => (others => '0'));
-	signal wr_out_new: std_logic;
 	
 	COMPONENT driver7Segmentos IS
 		PORT( codigoCaracter : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
@@ -44,6 +46,11 @@ ARCHITECTURE Structure OF controladores_IO IS
 				 data_ready : out   STD_LOGIC);
 	END COMPONENT;
 	
+	signal cycles_counter: std_logic_vector(15 downto 0) := (others => '0');
+	signal milliseconds_counter: std_logic_vector(15 downto 0) := (others => '0');
+
+	signal wr_out_new: std_logic;
+
 	signal kc0_read_char: std_logic_vector(7 downto 0);
 	signal kc0_clear_char: std_logic;
 	signal kc0_data_ready: std_logic;
@@ -92,12 +99,29 @@ BEGIN
 	process(CLOCK_50)
 	begin
 		if rising_edge(CLOCK_50) then
+			-- Update timer
+			if cycles_counter = 0 then
+				cycles_counter <= X"C350"; -- tiempo de ciclo=20ns(50Mhz) 1ms=50000ciclos
+				if milliseconds_counter > 0 then
+					milliseconds_counter <= milliseconds_counter - 1;
+				end if;
+			else
+				cycles_counter <= cycles_counter - 1;
+			end if;
+
+			--Update I/O ports
 			if wr_out_new = '1' then
-				io_ports(to_integer(unsigned(addr_io))) <= wr_io;
+				if addr_io = X"15" then
+					milliseconds_counter <= wr_io;
+				else
+					io_ports(to_integer(unsigned(addr_io))) <= wr_io;
+				end if;
 			end if;
 			--Inputs hardcoded
 			io_ports(7)(3 downto 0) <= KEY;
 			io_ports(8)(7 downto 0) <= SW(7 downto 0);
+			io_ports(20) <= cycles_counter;
+			io_ports(21) <= milliseconds_counter;
 		end if;
 	end process;
 
@@ -114,5 +138,7 @@ BEGIN
 	--Outputs
 	led_verdes <= io_ports(5)(7 downto 0);
 	led_rojos <= io_ports(6)(7 downto 0);
+	vga_cursor <= io_ports(11);
+	vga_cursor_enable <= io_ports(12)(0);
 
 END Structure;

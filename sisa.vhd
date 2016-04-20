@@ -22,11 +22,11 @@ ENTITY sisa IS
           SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
           KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 			 PS2_CLK   : inout std_logic; 
-			 PS2_DATA  : inout std_logic;
+			 PS2_DAT  : inout std_logic;
 			 --VGA
-			 VGA_R		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-			 VGA_G		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-			 VGA_B		: OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+			 VGA_R		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+			 VGA_G		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+			 VGA_B		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
 			 VGA_HS		: OUT STD_LOGIC;
 			 VGA_VS		: OUT STD_LOGIC);
 END sisa;
@@ -71,7 +71,9 @@ ARCHITECTURE Structure OF sisa IS
 		SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
 		KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 		ps2_clk : inout std_logic;
-		ps2_data : inout std_logic);
+		ps2_data : inout std_logic;
+		vga_cursor : out std_logic_vector(15 downto 0);
+		vga_cursor_enable : out std_logic);
 	END COMPONENT;
 
 	COMPONENT MemoryController is
@@ -114,7 +116,7 @@ ARCHITECTURE Structure OF sisa IS
          rd_data           : out std_logic_vector(15 downto 0);
          byte_m            : in std_logic;
          vga_cursor        : in std_logic_vector(15 downto 0);  -- simplemente lo ignoramos, este controlador no lo tiene implementado
-         vga_cursor_enable : in std_logic);                     -- simplemente lo ignoramos, este controlador no lo tiene implementado
+         vga_cursor_enable : in std_logic);                    -- simplemente lo ignoramos, este controlador no lo tiene implementado
 	end COMPONENT;
 
 	signal proc0_word_byte: std_logic;
@@ -133,12 +135,19 @@ ARCHITECTURE Structure OF sisa IS
 	signal mc0_vga_we      : std_logic;
 	signal mc0_vga_wr_data : std_logic_vector(15 downto 0);
 	signal mc0_vga_byte_m  : std_logic;
-	
+
 	signal vc0_vga_rd_data : std_logic_vector(15 downto 0);
 
 	signal clock_625Mhz_signal: std_logic;
 
 	signal boot: std_logic;
+
+	signal vc0_red_out: std_logic_vector(7 downto 0);
+	signal vc0_blue_out: std_logic_vector(7 downto 0);
+	signal vc0_green_out: std_logic_vector(7 downto 0);
+
+	signal io0_vga_cursor_enable: std_logic;
+	signal io0_vga_cursor : std_logic_vector(15 downto 0);
 
 BEGIN
 
@@ -183,7 +192,9 @@ BEGIN
 		SW => SW,
 		KEY => KEY,
 		ps2_clk => PS2_CLK,
-		ps2_data => PS2_DATA
+		ps2_data => PS2_DAT,
+		vga_cursor => io0_vga_cursor,
+		vga_cursor_enable => io0_vga_cursor_enable
 	);
 
 	mc0: MemoryController port map(
@@ -213,20 +224,23 @@ BEGIN
 	vc0: vga_controller port map(
 			clk_50mhz => CLOCK_50,
          reset => boot,
-         red_out => VGA_R, 
-         green_out => VGA_G,
-         blue_out => VGA_B,
+         red_out => vc0_red_out,
+         green_out => vc0_green_out,
+         blue_out => vc0_blue_out,
          horiz_sync_out => VGA_HS,
          vert_sync_out => VGA_VS,
          --
          addr_vga => mc0_vga_addr,
-         we => mc0_vga_we ,
+         we => mc0_vga_we,
          wr_data => mc0_vga_wr_data,
          rd_data => vc0_vga_rd_data,
          byte_m => mc0_vga_byte_m,
-         vga_cursor => (others => '0'),
-         vga_cursor_enable => '0'    
+         vga_cursor => io0_vga_cursor,
+         vga_cursor_enable => io0_vga_cursor_enable
 	);
 
+	VGA_R <= vc0_red_out(3 downto 0);
+	VGA_G <= vc0_green_out(3 downto 0);
+	VGA_B <= vc0_blue_out(3 downto 0);
 
 END Structure;
