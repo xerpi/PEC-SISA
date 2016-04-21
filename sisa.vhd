@@ -4,7 +4,7 @@ USE ieee.std_logic_unsigned.all;
 
 ENTITY sisa IS
     PORT (CLOCK_50  : IN    STD_LOGIC;
-			 --SRAM
+		  --SRAM
           SRAM_ADDR : out   std_logic_vector(17 downto 0);
           SRAM_DQ   : inout std_logic_vector(15 downto 0);
           SRAM_UB_N : out   std_logic;
@@ -12,7 +12,7 @@ ENTITY sisa IS
           SRAM_CE_N : out   std_logic := '1';
           SRAM_OE_N : out   std_logic := '1';
           SRAM_WE_N : out   std_logic := '1';
-			 --I/O
+		  --I/O
           LEDG      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
           LEDR      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
           HEX0      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
@@ -21,14 +21,14 @@ ENTITY sisa IS
           HEX3      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
           SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
           KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-			 PS2_CLK   : inout std_logic; 
-			 PS2_DAT  : inout std_logic;
-			 --VGA
-			 VGA_R		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-			 VGA_G		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-			 VGA_B		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-			 VGA_HS		: OUT STD_LOGIC;
-			 VGA_VS		: OUT STD_LOGIC);
+		  PS2_CLK   : inout std_logic; 
+		  PS2_DAT  : inout std_logic;
+		  --VGA
+		  VGA_R		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		  VGA_G		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		  VGA_B		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+		  VGA_HS		: OUT STD_LOGIC;
+		  VGA_VS		: OUT STD_LOGIC);
 END sisa;
 
 ARCHITECTURE Structure OF sisa IS

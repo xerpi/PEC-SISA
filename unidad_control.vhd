@@ -4,26 +4,27 @@ USE ieee.numeric_std.all;
 USE ieee.std_logic_unsigned.all;
 
 ENTITY unidad_control IS
-    PORT (boot      : IN  STD_LOGIC;
-          clk       : IN  STD_LOGIC;
-          datard_m  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-          op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-          func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-          wrd       : OUT STD_LOGIC;
-          addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-          addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-          addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-          immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-          pc        : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-          ins_dad   : OUT STD_LOGIC;
-          in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-          wr_m      : OUT STD_LOGIC;
-          word_byte : OUT STD_LOGIC;
-          alu_immed : OUT STD_LOGIC;
-	  alu_z     : IN STD_LOGIC;
-	  reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-	  wr_out    : OUT STD_LOGIC;
-	  rd_in     : OUT STD_LOGIC);
+	PORT (boot      : IN  STD_LOGIC;
+		clk       : IN  STD_LOGIC;
+		datard_m  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+		op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+		func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+		wrd       : OUT STD_LOGIC;
+		addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+		addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+		addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+		immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		pc        : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		ins_dad   : OUT STD_LOGIC;
+		in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+		wr_m      : OUT STD_LOGIC;
+		word_byte : OUT STD_LOGIC;
+		alu_immed : OUT STD_LOGIC;
+		alu_z     : IN STD_LOGIC;
+		reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		wr_out    : OUT STD_LOGIC;
+		rd_in     : OUT STD_LOGIC;
+		a_sys     : OUT STD_LOGIC);
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -54,7 +55,9 @@ ARCHITECTURE Structure OF unidad_control IS
 			abs_jmp_tkn : OUT STD_LOGIC;
 			-- I/O signals
 			wr_out    : OUT STD_LOGIC;
-			rd_in     : OUT STD_LOGIC);
+			rd_in     : OUT STD_LOGIC;
+			-- Selects General/System regfile
+			a_sys     : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT multi is
@@ -88,6 +91,7 @@ ARCHITECTURE Structure OF unidad_control IS
 	signal c0_word_byte: std_logic;
 	signal c0_immed: std_logic_vector(15 downto 0);
 	signal c0_wr_out: std_logic;
+
 	signal m0_ldir: std_logic;
 
 	signal tkn_jmp: std_logic_vector(1 downto 0);
@@ -156,7 +160,8 @@ BEGIN
 		rel_jmp_tkn => tkn_jmp(0),
 		abs_jmp_tkn => tkn_jmp(1),
 		wr_out => c0_wr_out,
-		rd_in => rd_in
+		rd_in => rd_in,
+		a_sys => a_sys
 	);
 
 	m0: multi port map(

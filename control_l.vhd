@@ -27,7 +27,9 @@ ENTITY control_l IS
 		abs_jmp_tkn : OUT STD_LOGIC;
 		-- I/O signals
 		wr_out      : OUT STD_LOGIC;
-		rd_in       : OUT STD_LOGIC);
+		rd_in       : OUT STD_LOGIC;
+		-- Selects General/System regfile
+		a_sys       : OUT STD_LOGIC);
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
@@ -55,6 +57,8 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_io_wr_out       : std_logic;
 	signal c0_io_rd_in        : std_logic;
 
+	signal c0_special_ldpc    : std_logic;
+
 	signal opcode             : std_logic_vector(3 downto 0);
 
 	COMPONENT control_l_generic IS
@@ -70,7 +74,8 @@ ARCHITECTURE Structure OF control_l IS
 			wr_m      : OUT STD_LOGIC;
 			in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 			word_byte : OUT STD_LOGIC;
-			alu_immed : OUT STD_LOGIC);
+			alu_immed : OUT STD_LOGIC;
+			a_sys     : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT control_l_mov IS
@@ -96,6 +101,12 @@ ARCHITECTURE Structure OF control_l IS
 		  rd_in      : OUT STD_LOGIC);
 	END COMPONENT;
 
+	COMPONENT control_l_special IS
+		PORT (ir        : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+				ldpc_in   : IN STD_LOGIC;
+				ldpc_out  : OUT STD_LOGIC);
+	END COMPONENT;
+
 
 BEGIN
 	opcode <= ir(15 downto 12);
@@ -113,7 +124,8 @@ BEGIN
 		wr_m => c0_g_wr_m,
 		in_d => c0_g_in_d,
 		word_byte => c0_g_word_byte,
-		alu_immed => c0_g_alu_immed
+		alu_immed => c0_g_alu_immed,
+		a_sys => a_sys
 	);
 
 	c0_mov: control_l_mov port map(
@@ -139,9 +151,16 @@ BEGIN
 		rd_in => c0_io_rd_in
 	);
 
+	c0_special: control_l_special port map(
+		ir => ir,
+		ldpc_in => c0_g_ldpc,
+		ldpc_out => c0_special_ldpc
+	);
 
 	op <= c0_g_op;
-	ldpc <= c0_g_ldpc;
+
+	ldpc <= c0_special_ldpc;
+
 	addr_a <= c0_g_addr_a;
 	addr_b <= c0_g_addr_b;
 	addr_d <= c0_g_addr_d;

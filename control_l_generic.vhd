@@ -19,7 +19,8 @@ ENTITY control_l_generic IS
           wr_m      : OUT STD_LOGIC;
           in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
           word_byte : OUT STD_LOGIC;
-          alu_immed : OUT STD_LOGIC);
+          alu_immed : OUT STD_LOGIC;
+			 a_sys     : OUT STD_LOGIC);
 END control_l_generic;
 
 ARCHITECTURE Structure OF control_l_generic IS
@@ -51,7 +52,7 @@ BEGIN
 			--Arithmetic logic instructions
 			addr_a_8_dt_6  & addr_b_2_dt_0  & op_al_unit     & "XXX"         & func_sel_5_dt_3 & "XX"                 & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_alu   when ARIT_LOGIC,
 			addr_a_8_dt_6  & addr_b_2_dt_0  & op_cmp_unit    & "XXX"         & func_sel_5_dt_3 & "XX"                 & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_alu   when COMPARE,
-			addr_a_8_dt_6  &      'X'       & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six     & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_immed when ADDI,
+			addr_a_8_dt_6  & 'X'            & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six     & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_immed when ADDI,
 			addr_a_8_dt_6  & 'X'            & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six_x2  & wrd_allow & wr_m_deny  & ldpc_continue & in_d_mem    & word_byte_w & alu_immed_immed when LOAD,
 			addr_a_8_dt_6  & addr_b_11_dt_9 & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six_x2  & wrd_deny  & wr_m_allow & ldpc_continue & "XX"        & word_byte_w & alu_immed_immed when STORE,
 			addr_a_11_dt_9 & 'X'            & op_misc_unit   & func_dec_mov  & func_sel_dec    & immed_sel_se_eight   & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_immed when MOV, --MOVI by default
@@ -69,7 +70,7 @@ BEGIN
 			'X'            & addr_b_11_dt_9 & "XX"           & "XXX"         & "XX"            & immed_sel_se_eight    & wrd_deny & wr_m_deny  & ldpc_continue & in_d_io     & 'X'         & "X"             when IN_OUT,
 
 			--Special instuctions
-			'X'            & 'X'            & "XX"           & "XXX"         & "XX"            & "XX"                  & wrd_deny & wr_m_deny  & ldpc_stop     & "XX"        & 'X'         & 'X'             when SPECIAL, -- HALT by default
+			addr_a_8_dt_6  & 'X'            & "XX"           & "XXX"         & "XX"            & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & "XX"        & 'X'         & 'X'             when SPECIAL, -- HALT by default
 
 
 			(others => 'X')  when others;
@@ -109,10 +110,13 @@ BEGIN
 			se_eight_x2 when immed_sel_se_eight_x2,
 			(others => 'X') when others;
 
+	a_sys <=
+		'1' when opcode = SPECIAL else --If special instruction, select SYSTEM regfile
+		'0';
+
 	wr_m <= decoder_out(5);
 	in_d <= decoder_out(3 downto 2);
 	word_byte <= decoder_out(1);
 	alu_immed <= decoder_out(0);
-
 
 END Structure;

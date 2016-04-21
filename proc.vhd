@@ -42,29 +42,32 @@ ARCHITECTURE Structure OF proc IS
 			alu_z     : IN STD_LOGIC;
 			reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 			wr_out    : OUT STD_LOGIC;
-			rd_in     : OUT STD_LOGIC);
+			rd_in     : OUT STD_LOGIC;
+			a_sys     : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT datapath IS
-		 PORT (clk      : IN  STD_LOGIC;
-			op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
-			func     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-			wrd      : IN  STD_LOGIC;
-			addr_a   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-			addr_b   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-			addr_d   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-			immed    : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-			datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-			ins_dad  : IN  STD_LOGIC;
-			pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-			in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
-			alu_immed: IN  STD_LOGIC;
-			addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-			data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-			alu_z    : OUT STD_LOGIC;
-			reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-			wr_io    : OUT STD_LOGIC_VECTOR(15 downto 0);
-			rd_io    : IN  STD_LOGIC_VECTOR(15 downto 0));
+		PORT (clk      : IN  STD_LOGIC;
+				op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
+				func     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+				wrd      : IN  STD_LOGIC;
+				addr_a   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+				addr_b   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+				addr_d   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+				immed    : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+				datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+				ins_dad  : IN  STD_LOGIC;
+				pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+				in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
+				alu_immed: IN  STD_LOGIC;
+				addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+				data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+				alu_z    : OUT STD_LOGIC;
+				reg_a    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+				wr_io    : OUT STD_LOGIC_VECTOR(15 downto 0);
+				rd_io    : IN  STD_LOGIC_VECTOR(15 downto 0);
+				--Selects general or system regfile
+				a_sys    : IN  STD_LOGIC);
 	END COMPONENT;
 
 	signal uc0_op: std_logic_vector(1 downto 0);
@@ -78,6 +81,7 @@ ARCHITECTURE Structure OF proc IS
 	signal uc0_ins_dad: std_logic;
 	signal uc0_in_d: std_logic_vector(1 downto 0);
 	signal uc0_alu_immed: std_logic;
+	signal uc0_a_sys: std_logic;
 
 	signal dp0_alu_z: std_logic;
 	signal dp0_reg_a: std_logic_vector(15 downto 0);
@@ -107,7 +111,8 @@ BEGIN
 		alu_z => dp0_alu_z,
 		reg_a => dp0_reg_a,
 		wr_out => wr_out,
-		rd_in => rd_in
+		rd_in => rd_in,
+		a_sys => uc0_a_sys
 	);
 
 	dp0: datapath port map(
@@ -129,7 +134,8 @@ BEGIN
 		alu_z => dp0_alu_z,
 		reg_a => dp0_reg_a,
 		wr_io => wr_io,
-		rd_io => rd_io
+		rd_io => rd_io,
+		a_sys => uc0_a_sys
 	);
 
 	addr_io <= uc0_immed(7 downto 0);
