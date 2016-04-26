@@ -26,16 +26,16 @@ ENTITY controladores_IO IS
 END controladores_IO;
 
 ARCHITECTURE Structure OF controladores_IO IS
-	--type IO_PORTS_T is array (255 downto 0) of std_logic_vector(15 downto 0);
-	type IO_PORTS_T is array (21 downto 0) of std_logic_vector(15 downto 0);
+	type IO_PORTS_T is array (255 downto 0) of std_logic_vector(15 downto 0);
+	--type IO_PORTS_T is array (21 downto 0) of std_logic_vector(15 downto 0);
 	signal io_ports: IO_PORTS_T := (others => (others => '0'));
-	
+
 	COMPONENT driver7Segmentos IS
 		PORT( codigoCaracter : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 			bitsCaracter : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 			enable : in std_logic);
 	END COMPONENT;
-	
+
 	COMPONENT keyboard_controller IS
 		 PORT (clk        : in    STD_LOGIC;
 				 reset      : in    STD_LOGIC;
@@ -45,7 +45,7 @@ ARCHITECTURE Structure OF controladores_IO IS
 				 clear_char : in    STD_LOGIC;
 				 data_ready : out   STD_LOGIC);
 	END COMPONENT;
-	
+
 	signal cycles_counter: std_logic_vector(15 downto 0) := (others => '0');
 	signal milliseconds_counter: std_logic_vector(15 downto 0) := (others => '0');
 
@@ -54,7 +54,7 @@ ARCHITECTURE Structure OF controladores_IO IS
 	signal kc0_read_char: std_logic_vector(7 downto 0);
 	signal kc0_clear_char: std_logic;
 	signal kc0_data_ready: std_logic;
-	
+
 BEGIN
 
 	d0: driver7Segmentos port map(
@@ -62,25 +62,25 @@ BEGIN
 		bitsCaracter => HEX0,
 		enable => io_ports(9)(0)
 	);
-	
+
 	d1: driver7Segmentos port map(
 		codigoCaracter => io_ports(10)(7 downto 4),
 		bitsCaracter => HEX1,
 		enable => io_ports(9)(1)
 	);
-	
+
 	d2: driver7Segmentos port map(
 		codigoCaracter => io_ports(10)(11 downto 8),
 		bitsCaracter => HEX2,
 		enable => io_ports(9)(2)
 	);
-	
+
 	d3: driver7Segmentos port map(
 		codigoCaracter => io_ports(10)(15 downto 12),
 		bitsCaracter => HEX3,
 		enable => io_ports(9)(3)
 	);
-	
+
 	kc0: keyboard_controller port map(
 		clk => CLOCK_50,
 		reset => boot,
@@ -90,12 +90,12 @@ BEGIN
 		clear_char => kc0_clear_char,
 		data_ready => kc0_data_ready
 	);
-	
+
 	with addr_io select
 		wr_out_new <=
 			'0' when X"07", --Prohibir escritura puerto 7
 			wr_out when others;
-	
+
 	process(CLOCK_50)
 	begin
 		if rising_edge(CLOCK_50) then

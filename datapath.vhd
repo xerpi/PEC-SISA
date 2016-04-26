@@ -67,6 +67,9 @@ ARCHITECTURE Structure OF datapath IS
 
 	signal reg_system0_a: std_logic_vector(15 downto 0);
 
+	signal wrd_in_reg_general0: std_logic;
+	signal wrd_in_reg_system0: std_logic;
+
 BEGIN
 
 	with in_d select
@@ -93,9 +96,12 @@ BEGIN
 	 -- Aqui iria la declaracion del "mapeo" (PORT MAP) de los nombres de las entradas/salidas de los componentes
 	 -- En los esquemas de la documentacion a la instancia del banco de registros le hemos llamado reg0 y a la de la alu le hemos llamado alu0
 
+	wrd_in_reg_general0 <= wrd and not a_sys;
+	wrd_in_reg_system0 <= wrd and a_sys;
+
 	reg_general0: regfile port map(
 		clk    => clk,
-		wrd    => wrd and not a_sys, --a_sys = 0: general regfile
+		wrd    => wrd_in_reg_general0, --a_sys = 0: general regfile
 		d      => reg_d_in,
 		addr_a => addr_a,
 		addr_b => addr_b,
@@ -106,7 +112,7 @@ BEGIN
 
 	reg_system0: regfile port map(
 		clk    => clk,
-		wrd    => wrd and a_sys, --a_sys = 1: system regfile
+		wrd    => wrd_in_reg_system0, --a_sys = 1: system regfile
 		d      => reg_d_in,
 		addr_a => addr_a,
 		addr_b => (others => '0'),
@@ -132,6 +138,7 @@ BEGIN
 	with a_sys select
 		reg_a <=
 			reg_general0_a when '0', --a_sys = 0: general regfile
-			reg_system0_a when '1'; --a_sys = 1: system regfile
+			reg_system0_a when '1', --a_sys = 1: system regfile
+			(others => '0') when others;
 
 END Structure;

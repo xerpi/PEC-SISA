@@ -67,8 +67,8 @@ architecture vga_controller_rtl of vga_controller is
           we1    : in STD_LOGIC;
           clk    : in STD_LOGIC;
           d1     : in STD_LOGIC_VECTOR(d_width - 1 downto 0);
-          addr1  : in unsigned(addr_width downto 0);
-          addr2  : in unsigned(addr_width - 1 downto 0);
+          addr1  : in std_logic_vector(addr_width downto 0);
+          addr2  : in std_logic_vector(addr_width - 1 downto 0);
           byte_m : in std_logic);
     end component;
 
@@ -141,11 +141,11 @@ architecture vga_controller_rtl of vga_controller is
             --write
             we1    => we,
             d1     => wr_data,
-            addr1  => unsigned(addr_vga),
+            addr1  => addr_vga,
             byte_m => byte_m,
             --read
             o2     => ram_q2,
-            addr2  => unsigned(ram_addr2)
+            addr2  => ram_addr2
         );
 
 

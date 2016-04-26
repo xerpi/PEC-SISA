@@ -1,4 +1,4 @@
-GHDLFLAGS = --ieee=synopsys
+GHDLFLAGS = --ieee=synopsys -fexplicit
 # Program input. If not defined environment variable
 # it will be defined as test_sisa
 INPUT ?= test_sisa

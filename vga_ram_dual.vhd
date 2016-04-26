@@ -19,8 +19,8 @@ entity vga_ram_dual is
          we1    : in STD_LOGIC;
          clk    : in STD_LOGIC;
          d1     : in STD_LOGIC_VECTOR(d_width - 1 downto 0);
-         addr1  : in unsigned(addr_width downto 0);
-         addr2  : in unsigned(addr_width - 1 downto 0);
+         addr1  : in std_logic_vector(addr_width downto 0);
+         addr2  : in std_logic_vector(addr_width - 1 downto 0);
          byte_m : in std_logic);
 end vga_ram_dual;
 
@@ -32,7 +32,7 @@ architecture vga_ram_dual_arch of vga_ram_dual is
     signal mem0 : mem_type;
     signal mem1 : mem_type;
 
-    signal addr_write : unsigned(addr_width  downto 0);
+    signal addr_write : STD_LOGIC_VECTOR(addr_width  downto 0);
     signal temp : STD_LOGIC_VECTOR(d_width - 1 downto 0);
 
 begin

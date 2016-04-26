@@ -4,31 +4,31 @@ USE ieee.std_logic_unsigned.all;
 
 ENTITY sisa IS
     PORT (CLOCK_50  : IN    STD_LOGIC;
-		  --SRAM
-          SRAM_ADDR : out   std_logic_vector(17 downto 0);
-          SRAM_DQ   : inout std_logic_vector(15 downto 0);
-          SRAM_UB_N : out   std_logic;
-          SRAM_LB_N : out   std_logic;
-          SRAM_CE_N : out   std_logic := '1';
-          SRAM_OE_N : out   std_logic := '1';
-          SRAM_WE_N : out   std_logic := '1';
-		  --I/O
-          LEDG      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-          LEDR      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-          HEX0      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
-          HEX1      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
-          HEX2      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
-          HEX3      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
-          SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
-          KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-		  PS2_CLK   : inout std_logic; 
-		  PS2_DAT  : inout std_logic;
-		  --VGA
-		  VGA_R		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-		  VGA_G		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-		  VGA_B		: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
-		  VGA_HS		: OUT STD_LOGIC;
-		  VGA_VS		: OUT STD_LOGIC);
+	--SRAM
+	SRAM_ADDR : out   std_logic_vector(17 downto 0);
+	SRAM_DQ   : inout std_logic_vector(15 downto 0);
+	SRAM_UB_N : out   std_logic;
+	SRAM_LB_N : out   std_logic;
+	SRAM_CE_N : out   std_logic := '1';
+	SRAM_OE_N : out   std_logic := '1';
+	SRAM_WE_N : out   std_logic := '1';
+	--I/O
+	LEDG      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+	LEDR      : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
+	HEX0      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+	HEX1      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+	HEX2      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+	HEX3      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
+	SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
+	KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+	PS2_CLK   : inout std_logic;
+	PS2_DAT   : inout std_logic;
+	--VGA
+	VGA_R     : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+	VGA_G     : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+	VGA_B     : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+	VGA_HS    : OUT STD_LOGIC;
+	VGA_VS    : OUT STD_LOGIC);
 END sisa;
 
 ARCHITECTURE Structure OF sisa IS
@@ -91,7 +91,7 @@ ARCHITECTURE Structure OF sisa IS
 		SRAM_CE_N : out   std_logic := '1';
 		SRAM_OE_N : out   std_logic := '1';
 		SRAM_WE_N : out   std_logic := '1';
-		--VGA 
+		--VGA
 		vga_addr    : out std_logic_vector(12 downto 0);
 		vga_we      : out std_logic;
 		vga_wr_data : out std_logic_vector(15 downto 0);
@@ -213,14 +213,14 @@ BEGIN
 		rd_data => mc0_rd_data,
 		we => proc0_wr_m,
 		byte_m => proc0_word_byte,
-		--VGA 
+		--VGA
 		vga_addr => mc0_vga_addr,
 		vga_we => mc0_vga_we,
 		vga_wr_data => mc0_vga_wr_data,
 		vga_rd_data => vc0_vga_rd_data,
 		vga_byte_m => mc0_vga_byte_m
 	);
-	
+
 	vc0: vga_controller port map(
 			clk_50mhz => CLOCK_50,
          reset => boot,
