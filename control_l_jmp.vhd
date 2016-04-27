@@ -10,10 +10,10 @@ use work.constants.all;
 ENTITY control_l_jmp IS
     PORT (ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
     	    alu_z      : IN STD_LOGIC;
-    	    wrd_in     : IN STD_LOGIC;
-            wrd_out    : OUT STD_LOGIC;
-	    rel_jmp_tkn: OUT STD_LOGIC;
-	    abs_jmp_tkn: OUT STD_LOGIC);
+            wrd_gen_in     : IN STD_LOGIC;
+            wrd_gen_out    : OUT STD_LOGIC;
+            rel_jmp_tkn: OUT STD_LOGIC;
+            abs_jmp_tkn: OUT STD_LOGIC);
 END control_l_jmp;
 
 ARCHITECTURE Structure OF control_l_jmp IS
@@ -43,9 +43,9 @@ BEGIN
 
 	jal_selector <= instr_abs_jmp & ir(2);
 	with jal_selector select -- JAL
-		wrd_out <=
+		wrd_gen_out <=
 			wrd_allow when "11",
-			wrd_in when others;
+			wrd_gen_in when others;
 
 
 	rel_jmp_tkn <= instr_rel_jmp and (ir(8) xor alu_z);

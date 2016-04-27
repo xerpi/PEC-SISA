@@ -11,7 +11,7 @@ ENTITY control_l_generic IS
           op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
           func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
           ldpc      : OUT STD_LOGIC;
-          wrd       : OUT STD_LOGIC;
+          wrd_gen   : OUT STD_LOGIC;
           addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
           addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
           addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -20,7 +20,7 @@ ENTITY control_l_generic IS
           in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
           word_byte : OUT STD_LOGIC;
           alu_immed : OUT STD_LOGIC;
-			 a_sys     : OUT STD_LOGIC);
+          a_sys     : OUT STD_LOGIC);
 END control_l_generic;
 
 ARCHITECTURE Structure OF control_l_generic IS
@@ -86,7 +86,7 @@ BEGIN
 			decoder_out(13 downto 11) when func_sel_dec,
 			(others => 'X') when others;
 	ldpc <= decoder_out(4);
-	wrd <= decoder_out(6);
+	wrd_gen <= decoder_out(6);
 
 	with decoder_out(17) select
 		addr_a <=

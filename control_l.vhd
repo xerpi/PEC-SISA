@@ -11,7 +11,8 @@ ENTITY control_l IS
 		op          : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 		func        : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		ldpc        : OUT STD_LOGIC;
-		wrd         : OUT STD_LOGIC;
+		wrd_gen     : OUT STD_LOGIC;
+		wrd_sys     : OUT STD_LOGIC;
 		addr_a      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		addr_b      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		addr_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -29,7 +30,9 @@ ENTITY control_l IS
 		wr_out      : OUT STD_LOGIC;
 		rd_in       : OUT STD_LOGIC;
 		-- Selects General/System regfile
-		a_sys       : OUT STD_LOGIC);
+		a_sys       : OUT STD_LOGIC;
+		--Special operation to perform in the system regfile
+		special     : OUT STD_LOGIC_VECTOR(2 downto 0));
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
@@ -37,7 +40,7 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_g_op            : std_logic_vector(1 DOWNTO 0);
 	signal c0_g_func          : std_logic_vector(2 DOWNTO 0);
 	signal c0_g_ldpc          : std_logic;
-	signal c0_g_wrd           : std_logic;
+	signal c0_g_wrd_gen       : std_logic;
 	signal c0_g_addr_a        : std_logic_vector(2 DOWNTO 0);
 	signal c0_g_addr_b        : std_logic_vector(2 DOWNTO 0);
 	signal c0_g_addr_d        : std_logic_vector(2 DOWNTO 0);
@@ -49,15 +52,17 @@ ARCHITECTURE Structure OF control_l IS
 
 	signal c0_mov_func        : std_logic_vector(2 DOWNTO 0);
 
-	signal c0_jmp_wrd         : std_logic;
+	signal c0_jmp_wrd_gen     : std_logic;
 	signal c0_jmp_rel_jmp_tkn : std_logic;
 	signal c0_jmp_abs_jmp_tkn : std_logic;
 
-	signal c0_io_wrd          : std_logic;
+	signal c0_io_wrd_gen      : std_logic;
 	signal c0_io_wr_out       : std_logic;
 	signal c0_io_rd_in        : std_logic;
 
 	signal c0_special_ldpc    : std_logic;
+	signal c0_special_wrd_sys : std_logic;
+	signal c0_special_special : std_logic_vector(2 downto 0);
 
 	signal opcode             : std_logic_vector(3 downto 0);
 
@@ -66,7 +71,7 @@ ARCHITECTURE Structure OF control_l IS
 			op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 			func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			ldpc      : OUT STD_LOGIC;
-			wrd       : OUT STD_LOGIC;
+			wrd_gen   : OUT STD_LOGIC;
 			addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -87,24 +92,26 @@ ARCHITECTURE Structure OF control_l IS
 	COMPONENT control_l_jmp IS
 		PORT (ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 			alu_z      : IN STD_LOGIC;
-			wrd_in     : IN STD_LOGIC;
-			wrd_out    : OUT STD_LOGIC;
+			wrd_gen_in     : IN STD_LOGIC;
+			wrd_gen_out    : OUT STD_LOGIC;
 			rel_jmp_tkn: OUT STD_LOGIC;
 			abs_jmp_tkn: OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT control_l_io IS
 	    PORT (ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-		  wrd_in     : IN STD_LOGIC;
-		  wrd_out    : OUT STD_LOGIC;
+		  wrd_gen_in     : IN STD_LOGIC;
+		  wrd_gen_out    : OUT STD_LOGIC;
 		  wr_out     : OUT STD_LOGIC;
 		  rd_in      : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT control_l_special IS
-		PORT (ir        : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				ldpc_in   : IN STD_LOGIC;
-				ldpc_out  : OUT STD_LOGIC);
+	    PORT (ir              : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  ldpc_in         : IN STD_LOGIC;
+		  ldpc_out        : OUT STD_LOGIC;
+		  wrd_sys         : OUT STD_LOGIC;
+		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0));
 	END COMPONENT;
 
 
@@ -116,7 +123,7 @@ BEGIN
 		op => c0_g_op,
 		func => c0_g_func,
 		ldpc => c0_g_ldpc,
-		wrd => c0_g_wrd,
+		wrd_gen => c0_g_wrd_gen,
 		addr_a => c0_g_addr_a,
 		addr_b => c0_g_addr_b,
 		addr_d => c0_g_addr_d,
@@ -136,17 +143,17 @@ BEGIN
 
 	c0_jmp: control_l_jmp port map(
 		ir => ir,
-		wrd_in => c0_g_wrd,
+		wrd_gen_in => c0_g_wrd_gen,
 		alu_z => alu_z,
-		wrd_out => c0_jmp_wrd,
+		wrd_gen_out => c0_jmp_wrd_gen,
 		rel_jmp_tkn => c0_jmp_rel_jmp_tkn,
 		abs_jmp_tkn => c0_jmp_abs_jmp_tkn
 	);
 
 	c0_io: control_l_io port map(
 		ir => ir,
-		wrd_in => c0_jmp_wrd,
-		wrd_out => c0_io_wrd,
+		wrd_gen_in => c0_jmp_wrd_gen,
+		wrd_gen_out => c0_io_wrd_gen,
 		wr_out => c0_io_wr_out,
 		rd_in => c0_io_rd_in
 	);
@@ -154,7 +161,9 @@ BEGIN
 	c0_special: control_l_special port map(
 		ir => ir,
 		ldpc_in => c0_g_ldpc,
-		ldpc_out => c0_special_ldpc
+		ldpc_out => c0_special_ldpc,
+		wrd_sys => c0_special_wrd_sys,
+		sys_reg_special => c0_special_special
 	);
 
 	op <= c0_g_op;
@@ -172,7 +181,9 @@ BEGIN
 
 	func <= c0_mov_func;
 
-	wrd <= c0_io_wrd;
+	wrd_gen <= c0_io_wrd_gen;
+	wrd_sys <= c0_special_wrd_sys;
+	special <= c0_special_special;
 	rel_jmp_tkn <= c0_jmp_rel_jmp_tkn;
 	abs_jmp_tkn <= c0_jmp_abs_jmp_tkn;
 

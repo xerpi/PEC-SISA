@@ -9,7 +9,8 @@ ENTITY unidad_control IS
 		datard_m  : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 		func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-		wrd       : OUT STD_LOGIC;
+		wrd_gen   : OUT STD_LOGIC;
+		wrd_sys   : OUT STD_LOGIC;
 		addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -24,7 +25,12 @@ ENTITY unidad_control IS
 		reg_a     : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 		wr_out    : OUT STD_LOGIC;
 		rd_in     : OUT STD_LOGIC;
-		a_sys     : OUT STD_LOGIC);
+		--Selects general or system regfile
+		a_sys     : OUT STD_LOGIC;
+		--Special operation to perform in the system regfile
+		special   : OUT STD_LOGIC_VECTOR(2 downto 0);
+		--Interrupts enabled
+		inten     : IN STD_LOGIC);
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -39,7 +45,8 @@ ARCHITECTURE Structure OF unidad_control IS
 			op        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
 			func      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			ldpc      : OUT STD_LOGIC;
-			wrd       : OUT STD_LOGIC;
+			wrd_gen   : OUT STD_LOGIC;
+			wrd_sys   : OUT STD_LOGIC;
 			addr_a    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			addr_b    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -57,24 +64,35 @@ ARCHITECTURE Structure OF unidad_control IS
 			wr_out    : OUT STD_LOGIC;
 			rd_in     : OUT STD_LOGIC;
 			-- Selects General/System regfile
-			a_sys     : OUT STD_LOGIC);
+			a_sys     : OUT STD_LOGIC;
+			--Special operation to perform in the system regfile
+			special   : OUT STD_LOGIC_VECTOR(2 downto 0));
 	END COMPONENT;
 
 	COMPONENT multi is
-	    port(clk       : IN  STD_LOGIC;
-		 boot      : IN  STD_LOGIC;
-		 ldpc_1    : IN  STD_LOGIC;
-		 wrd_1     : IN  STD_LOGIC;
-		 wr_m_1    : IN  STD_LOGIC;
-		 w_b       : IN  STD_LOGIC;
-		 wr_out_1  : IN  STD_LOGIC;
-		 ldpc      : OUT STD_LOGIC;
-		 wrd       : OUT STD_LOGIC;
-		 wr_m      : OUT STD_LOGIC;
-		 ldir      : OUT STD_LOGIC;
-		 ins_dad   : OUT STD_LOGIC;
-		 word_byte : OUT STD_LOGIC;
-		 wr_out    : OUT STD_LOGIC);
+	    port(clk         : IN  STD_LOGIC;
+		 boot        : IN  STD_LOGIC;
+		 --Interrupts enabled
+		 inten       : IN STD_LOGIC;
+		 --Input signals to filter
+		 ldpc_in     : IN  STD_LOGIC;
+		 wrd_gen_in  : IN  STD_LOGIC;
+		 wrd_sys_in  : IN  STD_LOGIC;
+		 wr_m_in     : IN  STD_LOGIC;
+		 w_b         : IN  STD_LOGIC;
+		 wr_out_in   : IN  STD_LOGIC;
+		 special_in  : IN  STD_LOGIC_VECTOR(2 downto 0);
+		 --Output signals filtered
+		 ldpc_out    : OUT STD_LOGIC;
+		 wrd_gen_out : OUT STD_LOGIC;
+		 wrd_sys_out : OUT STD_LOGIC;
+		 wrd         : OUT STD_LOGIC;
+		 wr_m        : OUT STD_LOGIC;
+		 ldir        : OUT STD_LOGIC;
+		 ins_dad     : OUT STD_LOGIC;
+		 word_byte   : OUT STD_LOGIC;
+		 wr_out      : OUT STD_LOGIC;
+		 special_out : OUT  STD_LOGIC_VECTOR(2 downto 0));
 	END COMPONENT;
 
 	--Registers
@@ -86,11 +104,13 @@ ARCHITECTURE Structure OF unidad_control IS
 	signal new_pc_out0, new_pc_out1, new_pc_out2: std_logic_vector(15 downto 0);
 	signal ir_reg_out0, ir_reg_out1: std_logic_vector(15 downto 0);
 	signal c0_ldpc: std_logic;
-	signal c0_wrd: std_logic;
+	signal c0_wrd_gen: std_logic;
+	signal c0_wrd_sys: std_logic;
 	signal c0_wr_m: std_logic;
 	signal c0_word_byte: std_logic;
 	signal c0_immed: std_logic_vector(15 downto 0);
 	signal c0_wr_out: std_logic;
+	signal c0_special: std_logic_vector(2 downto 0);
 
 	signal m0_ldir: std_logic;
 
@@ -147,7 +167,8 @@ BEGIN
 		op => op,
 		func => func,
 		ldpc => c0_ldpc,
-		wrd => c0_wrd,
+		wrd_gen => c0_wrd_gen,
+		wrd_sys => c0_wrd_sys,
 		addr_a => addr_a,
 		addr_b => addr_b,
 		addr_d => addr_d,
@@ -161,24 +182,32 @@ BEGIN
 		abs_jmp_tkn => tkn_jmp(1),
 		wr_out => c0_wr_out,
 		rd_in => rd_in,
-		a_sys => a_sys
+		a_sys => a_sys,
+		special => c0_special
 	);
 
 	m0: multi port map(
-		clk => clk,
-		boot => boot,
-		ldpc_1 => c0_ldpc,
-		wrd_1 => c0_wrd,
-		wr_m_1 => c0_wr_m,
-		w_b => c0_word_byte,
-		wr_out_1 => c0_wr_out,
-		ldpc => m0_ldpc,
-		wrd => wrd,
-		wr_m => wr_m,
-		ldir => m0_ldir,
-		ins_dad => ins_dad,
-		word_byte => word_byte,
-		wr_out => wr_out
+		clk         => clk,
+		boot        => boot,
+		inten       => inten,
+		--Input signals
+		ldpc_in     => c0_ldpc,
+		wrd_gen_in  => c0_wrd_gen,
+		wrd_sys_in  => c0_wrd_sys,
+		wr_m_in     => c0_wr_m,
+		w_b         => c0_word_byte,
+		wr_out_in   => c0_wr_out,
+		special_in  => c0_special,
+		--Output signals (filtered)
+		ldpc_out    => m0_ldpc,
+		wrd_gen_out => wrd_gen,
+		wrd_sys_out => wrd_sys,
+		wr_m        => wr_m,
+		ldir        => m0_ldir,
+		ins_dad     => ins_dad,
+		word_byte   => word_byte,
+		wr_out      => wr_out,
+		special_out => special
 	);
 
 	immed <= c0_immed;

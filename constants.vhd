@@ -48,4 +48,11 @@ package constants is
 	constant alu_immed_immed     : std_logic := '1'; --select immed
 	constant alu_immed_alu       : std_logic := '0'; -- select alu output
 
+	--Special operation to perform in the system regfile
+	constant special_none        : std_logic_vector(2 downto 0) := B"000";
+	constant special_ei          : std_logic_vector(2 downto 0) := B"001";
+	constant special_di          : std_logic_vector(2 downto 0) := B"010";
+	constant special_reti        : std_logic_vector(2 downto 0) := B"011";
+	constant special_start_int   : std_logic_vector(2 downto 0) := B"100"; --Used to trigger the interrupt
+
 end constants;

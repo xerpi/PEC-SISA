@@ -9,7 +9,8 @@ ENTITY datapath IS
 	PORT (clk      : IN  STD_LOGIC;
 			op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
 			func     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
-			wrd      : IN  STD_LOGIC;
+			wrd_gen  : IN  STD_LOGIC;
+			wrd_sys  : IN  STD_LOGIC;
 			addr_a   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 			addr_b   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 			addr_d   : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -26,25 +27,29 @@ ENTITY datapath IS
 			wr_io    : OUT STD_LOGIC_VECTOR(15 downto 0);
 			rd_io    : IN  STD_LOGIC_VECTOR(15 downto 0);
 			--Selects general or system regfile
-			a_sys    : IN  STD_LOGIC);
+			a_sys    : IN  STD_LOGIC;
+			--Special operation to perform in the system regfile
+			special  : IN STD_LOGIC_VECTOR(2 downto 0);
+			--Interrupts enabled
+			inten   : OUT STD_LOGIC);
 END datapath;
 
 ARCHITECTURE Structure OF datapath IS
 
-	 -- Aqui iria la declaracion de las entidades que vamos a usar
-	 -- Usaremos la palabra reservada COMPONENT ...
-	 -- Tambien crearemos los cables/buses (signals) necesarios para unir las entidades
-
-	COMPONENT regfile IS
-		 PORT (
-                  clk    : IN STD_LOGIC;
-                  wrd    : IN STD_LOGIC;
-                  d      : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-                  addr_a : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-                  addr_b : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-                  addr_d : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-                  a      : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-                  b      : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+	COMPONENT regfiles IS
+	    PORT (clk     : IN  STD_LOGIC;
+		  wrd_gen : IN  STD_LOGIC;
+		  wrd_sys : IN  STD_LOGIC;
+		  d       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  addr_a  : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+		  addr_b  : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+		  addr_d  : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+		  a       : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  b       : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  a_sys   : IN  STD_LOGIC;
+		  special : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
+		  --Interrupts enabled
+		  inten   : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT alu IS
@@ -58,17 +63,13 @@ ARCHITECTURE Structure OF datapath IS
 	END COMPONENT;
 
 	signal alu0_w: std_logic_vector(15 downto 0);
-	signal reg_general0_a: std_logic_vector(15 downto 0);
-	signal reg_general0_b: std_logic_vector(15 downto 0);
 
 	signal reg_d_in: std_logic_vector(15 downto 0);
 	signal addr_m_out: std_logic_vector(15 downto 0);
 	signal alu_y_in: std_logic_vector(15 downto 0);
 
-	signal reg_system0_a: std_logic_vector(15 downto 0);
-
-	signal wrd_in_reg_general0: std_logic;
-	signal wrd_in_reg_system0: std_logic;
+	signal regfiles0_a: std_logic_vector(15 downto 0);
+	signal regfiles0_b: std_logic_vector(15 downto 0);
 
 BEGIN
 
@@ -90,41 +91,25 @@ BEGIN
 	with alu_immed select
 		alu_y_in <=
 			immed when alu_immed_immed,
-			reg_general0_b when others;
+			regfiles0_b when others;
 
-
-	 -- Aqui iria la declaracion del "mapeo" (PORT MAP) de los nombres de las entradas/salidas de los componentes
-	 -- En los esquemas de la documentacion a la instancia del banco de registros le hemos llamado reg0 y a la de la alu le hemos llamado alu0
-
-	wrd_in_reg_general0 <= wrd and not a_sys;
-	wrd_in_reg_system0 <= wrd and a_sys;
-
-	reg_general0: regfile port map(
-		clk    => clk,
-		wrd    => wrd_in_reg_general0, --a_sys = 0: general regfile
-		d      => reg_d_in,
-		addr_a => addr_a,
-		addr_b => addr_b,
-		addr_d => addr_d,
-		a      => reg_general0_a,
-		b      => reg_general0_b
+	regfiles0: regfiles port map(
+		clk     => clk,
+		wrd_gen => wrd_gen,
+		wrd_sys => wrd_sys,
+		d       => reg_d_in,
+		addr_a  => addr_a,
+		addr_b  => addr_b,
+		addr_d  => addr_d,
+		a       => regfiles0_a,
+		b       => regfiles0_b,
+		a_sys   => a_sys,
+		special => special,
+		inten   => inten
 	);
-
-	reg_system0: regfile port map(
-		clk    => clk,
-		wrd    => wrd_in_reg_system0, --a_sys = 1: system regfile
-		d      => reg_d_in,
-		addr_a => addr_a,
-		addr_b => (others => '0'),
-		addr_d => addr_d,
-		a      => reg_system0_a,
-		b      => open
-	);
-
-	data_wr <= reg_general0_b;
 
 	alu0: alu port map(
-		x    => reg_general0_a,
+		x    => regfiles0_a,
 		y    => alu_y_in,
 		op   => op,
 		func => func,
@@ -132,13 +117,10 @@ BEGIN
 		z    => alu_z
 	);
 
-	addr_m <= addr_m_out;
-	wr_io <= reg_general0_b;
+	reg_a <= regfiles0_a;
+	data_wr <= regfiles0_b;
 
-	with a_sys select
-		reg_a <=
-			reg_general0_a when '0', --a_sys = 0: general regfile
-			reg_system0_a when '1', --a_sys = 1: system regfile
-			(others => '0') when others;
+	addr_m <= addr_m_out;
+	wr_io <= regfiles0_b;
 
 END Structure;

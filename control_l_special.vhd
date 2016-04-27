@@ -7,9 +7,11 @@ use work.opcodes.all;
 use work.constants.all;
 
 ENTITY control_l_special IS
-	PORT (ir        : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-			ldpc_in   : IN STD_LOGIC;
-			ldpc_out  : OUT STD_LOGIC);
+	    PORT (ir              : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+		  ldpc_in         : IN STD_LOGIC;
+		  ldpc_out        : OUT STD_LOGIC;
+		  wrd_sys         : OUT STD_LOGIC;
+		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0));
 END control_l_special;
 
 ARCHITECTURE Structure OF control_l_special IS
@@ -31,9 +33,20 @@ BEGIN
 	func <= ir(4 downto 0);
 	-- Get opcode from instruction
 	opcode <= ir(15 downto 12);
-	
+
 	ldpc_out <=
 		ldpc_stop when func = F_HALT and opcode = SPECIAL else
 		ldpc_in;
+
+	with func select
+		wrd_sys <=
+			'1' when F_WRS,  --Only write to the system regile when WRS
+			'0' when others;
+
+	sys_reg_special <=
+		special_ei when func = F_EI and opcode = SPECIAL else
+		special_di when func = F_DI and opcode = SPECIAL else
+		special_reti when func = F_RETI and opcode = SPECIAL else
+		special_none;
 
 END Structure;
