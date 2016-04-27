@@ -13,7 +13,8 @@ ENTITY proc IS
 			wr_io     : OUT STD_LOGIC_VECTOR(15 downto 0);
 			rd_io     : IN STD_LOGIC_VECTOR(15 downto 0);
 			wr_out    : OUT STD_LOGIC;
-			rd_in     : OUT STD_LOGIC);
+			rd_in     : OUT STD_LOGIC;
+			intr      : IN STD_LOGIC);
 END proc;
 
 ARCHITECTURE Structure OF proc IS
@@ -36,7 +37,7 @@ ARCHITECTURE Structure OF proc IS
 			immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 			pc        : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 			ins_dad   : OUT STD_LOGIC;
-			in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+			in_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			wr_m      : OUT STD_LOGIC;
 			word_byte : OUT STD_LOGIC;
 			alu_immed : OUT STD_LOGIC;
@@ -47,7 +48,9 @@ ARCHITECTURE Structure OF proc IS
 			a_sys     : OUT STD_LOGIC;
 			special   : OUT STD_LOGIC_VECTOR(2 downto 0);
 			--Interrupts enabled
-			inten     : IN STD_LOGIC);
+			inten     : IN STD_LOGIC;
+			--Interrupt request
+			intr      : IN STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT datapath IS
@@ -63,7 +66,7 @@ ARCHITECTURE Structure OF proc IS
 				datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 				ins_dad  : IN  STD_LOGIC;
 				pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-				in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
+				in_d     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 				alu_immed: IN  STD_LOGIC;
 				addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 				data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -89,7 +92,7 @@ ARCHITECTURE Structure OF proc IS
 	signal uc0_immed: std_logic_vector(15 downto 0);
 	signal uc0_pc: std_logic_vector(15 downto 0);
 	signal uc0_ins_dad: std_logic;
-	signal uc0_in_d: std_logic_vector(1 downto 0);
+	signal uc0_in_d: std_logic_vector(2 downto 0);
 	signal uc0_alu_immed: std_logic;
 	signal uc0_a_sys: std_logic;
 	signal uc0_special: std_logic_vector(2 downto 0);
@@ -127,7 +130,9 @@ BEGIN
 		rd_in => rd_in,
 		a_sys => uc0_a_sys,
 		special => uc0_special,
-		inten => dp0_inten
+		inten => dp0_inten,
+		--inten => '1', use this to test in gtkwave
+		intr => intr
 	);
 
 	dp0: datapath port map(

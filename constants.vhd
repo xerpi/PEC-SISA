@@ -27,6 +27,9 @@ package constants is
 	constant immed_sel_se_six_x2   : std_logic_vector(1 downto 0) := B"10";
 	constant immed_sel_se_eight_x2 : std_logic_vector(1 downto 0) := B"11";
 
+	constant tkn_jmp_si          : std_logic_vector(1 downto 0) := B"00";
+	constant tkn_jmp_jr          : std_logic_vector(1 downto 0) := B"01";
+	constant tkn_jmp_ja          : std_logic_vector(1 downto 0) := B"10";
 
 	constant wrd_allow           : std_logic := '1';
 	constant wrd_deny            : std_logic := '0';
@@ -37,10 +40,11 @@ package constants is
 	constant ldpc_continue       : std_logic := '1';
 	constant ldpc_stop           : std_logic := '0';
 
-	constant in_d_alu            : std_logic_vector(1 downto 0) := B"00"; --coming from ALU
-	constant in_d_mem            : std_logic_vector(1 downto 0) := B"01"; --coming from MEM
-	constant in_d_new_pc         : std_logic_vector(1 downto 0) := B"10"; --coming from new PC (only JAL)
-	constant in_d_io             : std_logic_vector(1 downto 0) := B"11"; --coming from I/O port IN
+	constant in_d_alu            : std_logic_vector(2 downto 0) := B"000"; --coming from ALU
+	constant in_d_mem            : std_logic_vector(2 downto 0) := B"001"; --coming from MEM
+	constant in_d_new_pc         : std_logic_vector(2 downto 0) := B"010"; --coming from new PC (only JAL)
+	constant in_d_io             : std_logic_vector(2 downto 0) := B"011"; --coming from I/O port IN
+	constant in_d_cur_pc         : std_logic_vector(2 downto 0) := B"100"; --Used when interrupt to save PCup
 
 	constant word_byte_b         : std_logic := '1'; -- when LDB/STB
 	constant word_byte_w         : std_logic := '0'; -- when others

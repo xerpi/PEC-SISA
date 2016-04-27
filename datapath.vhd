@@ -18,7 +18,7 @@ ENTITY datapath IS
 			datard_m : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 			ins_dad  : IN  STD_LOGIC;
 			pc       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-			in_d     : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
+			in_d     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 			alu_immed: IN  STD_LOGIC;
 			addr_m   : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 			data_wr  : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -79,6 +79,7 @@ BEGIN
 			datard_m when in_d_mem,
 			pc + 2 when in_d_new_pc,
 			rd_io when in_d_io,
+			pc when in_d_cur_pc,
 			(others => '0') when others;
 
 	with ins_dad select

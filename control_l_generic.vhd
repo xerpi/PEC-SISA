@@ -17,7 +17,7 @@ ENTITY control_l_generic IS
           addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
           immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
           wr_m      : OUT STD_LOGIC;
-          in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+          in_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
           word_byte : OUT STD_LOGIC;
           alu_immed : OUT STD_LOGIC;
           a_sys     : OUT STD_LOGIC);
@@ -30,12 +30,12 @@ ARCHITECTURE Structure OF control_l_generic IS
 	signal se_six_x2   : std_logic_vector(15 downto 0);
 	signal se_eight_x2 : std_logic_vector(15 downto 0);
 
-	signal decoder_out : std_logic_vector(17 downto 0);
+	signal decoder_out : std_logic_vector(18 downto 0);
 
 	signal opcode: std_logic_vector(3 downto 0);
 
 -- decoder_out format: name(num_bits)
--- addr_a_sel(1) - addr_b_sel(1) - op(2) - func_dec(3) - func_sel(2) - immed_sel(2) - wrd(1) - wr_m(1) - ldpc(1) - in_d(2) - word_byte(1) - alu_immed(1)
+-- addr_a_sel(1) - addr_b_sel(1) - op(2) - func_dec(3) - func_sel(2) - immed_sel(2) - wrd(1) - wr_m(1) - ldpc(1) - in_d(3) - word_byte(1) - alu_immed(1)
 
 BEGIN
 	-- Get opcode from instruction
@@ -54,47 +54,47 @@ BEGIN
 			addr_a_8_dt_6  & addr_b_2_dt_0  & op_cmp_unit    & "XXX"         & func_sel_5_dt_3 & "XX"                 & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_alu   when COMPARE,
 			addr_a_8_dt_6  & 'X'            & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six     & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_immed when ADDI,
 			addr_a_8_dt_6  & 'X'            & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six_x2  & wrd_allow & wr_m_deny  & ldpc_continue & in_d_mem    & word_byte_w & alu_immed_immed when LOAD,
-			addr_a_8_dt_6  & addr_b_11_dt_9 & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six_x2  & wrd_deny  & wr_m_allow & ldpc_continue & "XX"        & word_byte_w & alu_immed_immed when STORE,
+			addr_a_8_dt_6  & addr_b_11_dt_9 & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six_x2  & wrd_deny  & wr_m_allow & ldpc_continue & "XXX"       & word_byte_w & alu_immed_immed when STORE,
 			addr_a_11_dt_9 & 'X'            & op_misc_unit   & func_dec_mov  & func_sel_dec    & immed_sel_se_eight   & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_immed when MOV, --MOVI by default
 			addr_a_8_dt_6  & addr_b_2_dt_0  & op_muldiv_unit & "XXX"         & func_sel_5_dt_3 & "XX"                 & wrd_allow & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & alu_immed_alu   when MULT_DIV,
 
 			--Memory instructions
 			addr_a_8_dt_6  & 'X'            & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six     & wrd_allow & wr_m_deny  & ldpc_continue & in_d_mem    & word_byte_b & alu_immed_immed when LOAD_BYTE,
-			addr_a_8_dt_6  & addr_b_11_dt_9 & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six     & wrd_deny  & wr_m_allow & ldpc_continue & "XX"        & word_byte_b & alu_immed_immed when STORE_BYTE,
+			addr_a_8_dt_6  & addr_b_11_dt_9 & op_al_unit     & func_dec_sum  & func_sel_dec    & immed_sel_se_six     & wrd_deny  & wr_m_allow & ldpc_continue & "XXX"       & word_byte_b & alu_immed_immed when STORE_BYTE,
 
 			--Jump/branch instructions
-			'X'            & addr_b_11_dt_9 & op_misc_unit   & func_dec_mov  & func_sel_dec    & immed_sel_se_eight_x2 & wrd_deny & wr_m_deny  & ldpc_continue & "XX"        & 'X'         & alu_immed_alu   when RELATIVE_JUMP,
+			'X'            & addr_b_11_dt_9 & op_misc_unit   & func_dec_mov  & func_sel_dec    & immed_sel_se_eight_x2 & wrd_deny & wr_m_deny  & ldpc_continue & "XXX"       & 'X'         & alu_immed_alu   when RELATIVE_JUMP,
 			addr_a_8_dt_6  & addr_b_11_dt_9 & op_misc_unit   & func_dec_mov  & func_sel_dec    & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & in_d_new_pc & 'X'         & alu_immed_alu   when ABSOLUTE_JUMP, --not JAL by default (wrd_deny)
 
 			--I/O instructions
 			'X'            & addr_b_11_dt_9 & "XX"           & "XXX"         & "XX"            & immed_sel_se_eight    & wrd_deny & wr_m_deny  & ldpc_continue & in_d_io     & 'X'         & "X"             when IN_OUT,
 
 			--Special instuctions
-			addr_a_8_dt_6  & 'X'            & "XX"           & "XXX"         & "XX"            & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & "XX"        & 'X'         & 'X'             when SPECIAL, -- HALT by default
+			addr_a_8_dt_6  & 'X'            & "XX"           & "XXX"         & "XX"            & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & "XXX"       & 'X'         & 'X'             when SPECIAL, -- HALT by default
 
 
 			(others => 'X')  when others;
 
 
 
-	op <= decoder_out(15 downto 14);
+	op <= decoder_out(16 downto 15);
 
-	with decoder_out(10 downto 9) select
+	with decoder_out(11 downto 10) select
 		func <=
 			ir(5 downto 3) when func_sel_5_dt_3,
 			ir(2 downto 0) when func_sel_2_dt_0,
-			decoder_out(13 downto 11) when func_sel_dec,
+			decoder_out(14 downto 12) when func_sel_dec,
 			(others => 'X') when others;
-	ldpc <= decoder_out(4);
-	wrd_gen <= decoder_out(6);
+	ldpc <= decoder_out(5);
+	wrd_gen <= decoder_out(7);
 
-	with decoder_out(17) select
+	with decoder_out(18) select
 		addr_a <=
 			ir(11 downto 9) when addr_a_11_dt_9,
 			ir(8 downto 6) when addr_a_8_dt_6,
 			(others => 'X') when others;
 
-	with decoder_out(16) select
+	with decoder_out(17) select
 		addr_b <=
 			ir(11 downto 9) when addr_b_11_dt_9,
 			ir(2 downto 0) when addr_b_2_dt_0,
@@ -102,7 +102,7 @@ BEGIN
 
 	addr_d <= ir(11 downto 9);
 
-	with decoder_out(8 downto 7) select
+	with decoder_out(9 downto 8) select
 		immed <=
 			se_six when immed_sel_se_six,
 			se_eight when immed_sel_se_eight,
@@ -114,8 +114,8 @@ BEGIN
 		'1' when opcode = SPECIAL else --If special instruction, select SYSTEM regfile
 		'0';
 
-	wr_m <= decoder_out(5);
-	in_d <= decoder_out(3 downto 2);
+	wr_m <= decoder_out(6);
+	in_d <= decoder_out(4 downto 2);
 	word_byte <= decoder_out(1);
 	alu_immed <= decoder_out(0);
 

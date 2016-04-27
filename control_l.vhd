@@ -18,7 +18,7 @@ ENTITY control_l IS
 		addr_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		immed       : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 		wr_m        : OUT STD_LOGIC;
-		in_d        : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+		in_d        : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		word_byte   : OUT STD_LOGIC;
 		-- ALU signals
 		alu_immed   : OUT STD_LOGIC;
@@ -46,7 +46,7 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_g_addr_d        : std_logic_vector(2 DOWNTO 0);
 	signal c0_g_immed         : std_logic_vector(15 DOWNTO 0);
 	signal c0_g_wr_m          : std_logic;
-	signal c0_g_in_d          : std_logic_vector(1 DOWNTO 0);
+	signal c0_g_in_d          : std_logic_vector(2 DOWNTO 0);
 	signal c0_g_word_byte     : std_logic;
 	signal c0_g_alu_immed     : std_logic;
 
@@ -77,7 +77,7 @@ ARCHITECTURE Structure OF control_l IS
 			addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 			wr_m      : OUT STD_LOGIC;
-			in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+			in_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			word_byte : OUT STD_LOGIC;
 			alu_immed : OUT STD_LOGIC;
 			a_sys     : OUT STD_LOGIC);

@@ -51,7 +51,8 @@ ARCHITECTURE Structure OF sisa IS
 		wr_io     : OUT STD_LOGIC_VECTOR(15 downto 0);
 		rd_io     : IN STD_LOGIC_VECTOR(15 downto 0);
 		wr_out    : OUT STD_LOGIC;
-		rd_in     : OUT STD_LOGIC);
+		rd_in     : OUT STD_LOGIC;
+		intr      : IN STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT controladores_IO IS
@@ -70,10 +71,14 @@ ARCHITECTURE Structure OF sisa IS
 		HEX3      : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 		SW        : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
 		KEY       : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+		-- keyboard control
 		ps2_clk : inout std_logic;
 		ps2_data : inout std_logic;
+		--vga control
 		vga_cursor : out std_logic_vector(15 downto 0);
-		vga_cursor_enable : out std_logic);
+		vga_cursor_enable : out std_logic;
+		-- interrupt request
+		intr: out std_logic);
 	END COMPONENT;
 
 	COMPONENT MemoryController is
@@ -148,6 +153,7 @@ ARCHITECTURE Structure OF sisa IS
 
 	signal io0_vga_cursor_enable: std_logic;
 	signal io0_vga_cursor : std_logic_vector(15 downto 0);
+	signal io0_intr: std_logic;
 
 BEGIN
 
@@ -172,7 +178,8 @@ BEGIN
 		wr_io => proc0_wr_io,
 		rd_io => proc0_rd_io,
 		wr_out => proc0_wr_out,
-		rd_in => proc0_rd_in
+		rd_in => proc0_rd_in,
+		intr => io0_intr
 	);
 
 	io0: controladores_IO port map(
@@ -194,7 +201,8 @@ BEGIN
 		ps2_clk => PS2_CLK,
 		ps2_data => PS2_DAT,
 		vga_cursor => io0_vga_cursor,
-		vga_cursor_enable => io0_vga_cursor_enable
+		vga_cursor_enable => io0_vga_cursor_enable,
+		intr => io0_intr
 	);
 
 	mc0: MemoryController port map(

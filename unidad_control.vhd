@@ -3,6 +3,8 @@ USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 USE ieee.std_logic_unsigned.all;
 
+use work.constants.all;
+
 ENTITY unidad_control IS
 	PORT (boot      : IN  STD_LOGIC;
 		clk       : IN  STD_LOGIC;
@@ -17,7 +19,7 @@ ENTITY unidad_control IS
 		immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 		pc        : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 		ins_dad   : OUT STD_LOGIC;
-		in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+		in_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		wr_m      : OUT STD_LOGIC;
 		word_byte : OUT STD_LOGIC;
 		alu_immed : OUT STD_LOGIC;
@@ -29,8 +31,9 @@ ENTITY unidad_control IS
 		a_sys     : OUT STD_LOGIC;
 		--Special operation to perform in the system regfile
 		special   : OUT STD_LOGIC_VECTOR(2 downto 0);
-		--Interrupts enabled
-		inten     : IN STD_LOGIC);
+		inten     : IN STD_LOGIC;
+		--Interrupt request
+		intr      : IN STD_LOGIC);
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -52,7 +55,7 @@ ARCHITECTURE Structure OF unidad_control IS
 			addr_d    : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			immed     : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 			wr_m      : OUT STD_LOGIC;
-			in_d      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+			in_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			word_byte : OUT STD_LOGIC;
 			-- ALU signals
 			alu_immed : OUT STD_LOGIC;
@@ -74,6 +77,8 @@ ARCHITECTURE Structure OF unidad_control IS
 		 boot        : IN  STD_LOGIC;
 		 --Interrupts enabled
 		 inten       : IN STD_LOGIC;
+		 --Interrupt request
+		 intr        : IN STD_LOGIC;
 		 --Input signals to filter
 		 ldpc_in     : IN  STD_LOGIC;
 		 wrd_gen_in  : IN  STD_LOGIC;
@@ -82,6 +87,11 @@ ARCHITECTURE Structure OF unidad_control IS
 		 w_b         : IN  STD_LOGIC;
 		 wr_out_in   : IN  STD_LOGIC;
 		 special_in  : IN  STD_LOGIC_VECTOR(2 downto 0);
+		 a_sys_in    : IN STD_LOGIC;
+		 in_d_in     : IN STD_LOGIC_VECTOR(2 downto 0);
+		 addr_a_in   : IN STD_LOGIC_VECTOR(2 downto 0);
+		 addr_d_in   : IN STD_LOGIC_VECTOR(2 downto 0);
+		 tkn_jmp_in  : IN STD_LOGIC_VECTOR(1 downto 0);
 		 --Output signals filtered
 		 ldpc_out    : OUT STD_LOGIC;
 		 wrd_gen_out : OUT STD_LOGIC;
@@ -92,7 +102,12 @@ ARCHITECTURE Structure OF unidad_control IS
 		 ins_dad     : OUT STD_LOGIC;
 		 word_byte   : OUT STD_LOGIC;
 		 wr_out      : OUT STD_LOGIC;
-		 special_out : OUT  STD_LOGIC_VECTOR(2 downto 0));
+		 special_out : OUT  STD_LOGIC_VECTOR(2 downto 0);
+		 a_sys_out   : OUT STD_LOGIC;
+		 in_d_out    : OUT STD_LOGIC_VECTOR(2 downto 0);
+		 addr_a_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
+		 addr_d_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
+		 tkn_jmp_out : OUT STD_LOGIC_VECTOR(1 downto 0));
 	END COMPONENT;
 
 	--Registers
@@ -111,10 +126,15 @@ ARCHITECTURE Structure OF unidad_control IS
 	signal c0_immed: std_logic_vector(15 downto 0);
 	signal c0_wr_out: std_logic;
 	signal c0_special: std_logic_vector(2 downto 0);
+	signal c0_a_sys: std_logic;
+	signal c0_in_d: std_logic_vector(2 downto 0);
+	signal c0_addr_a: std_logic_vector(2 downto 0);
+	signal c0_addr_d: std_logic_vector(2 downto 0);
 
+	signal c0_tkn_jmp: std_logic_vector(1 downto 0);
+
+	signal m0_tkn_jmp: std_logic_vector(1 downto 0);
 	signal m0_ldir: std_logic;
-
-	signal tkn_jmp: std_logic_vector(1 downto 0);
 
 BEGIN
 
@@ -134,11 +154,11 @@ BEGIN
 			(others => '0') when '1', -- NOP
 			(others => '0') when others;
 
-	with tkn_jmp select
+	with m0_tkn_jmp select
 		new_pc_out0 <=
-			new_pc + 2 when "00", --SEC.IMPL
-			c0_immed + new_pc + 2 when "01", --REL
-			reg_a when "10", --ABS
+			new_pc + 2 when tkn_jmp_si, --SEC.IMPL
+			c0_immed + new_pc + 2 when tkn_jmp_jr, --REL
+			reg_a when tkn_jmp_ja, --ABS
 			(others => 'X') when others;
 
 
@@ -169,20 +189,20 @@ BEGIN
 		ldpc => c0_ldpc,
 		wrd_gen => c0_wrd_gen,
 		wrd_sys => c0_wrd_sys,
-		addr_a => addr_a,
+		addr_a => c0_addr_a,
 		addr_b => addr_b,
-		addr_d => addr_d,
+		addr_d => c0_addr_d,
 		immed => c0_immed,
 		wr_m => c0_wr_m,
-		in_d => in_d,
+		in_d => c0_in_d,
 		word_byte => c0_word_byte,
 		alu_immed => alu_immed,
 		alu_z => alu_z,
-		rel_jmp_tkn => tkn_jmp(0),
-		abs_jmp_tkn => tkn_jmp(1),
+		rel_jmp_tkn => c0_tkn_jmp(0),
+		abs_jmp_tkn => c0_tkn_jmp(1),
 		wr_out => c0_wr_out,
 		rd_in => rd_in,
-		a_sys => a_sys,
+		a_sys => c0_a_sys,
 		special => c0_special
 	);
 
@@ -190,6 +210,7 @@ BEGIN
 		clk         => clk,
 		boot        => boot,
 		inten       => inten,
+		intr        => intr,
 		--Input signals
 		ldpc_in     => c0_ldpc,
 		wrd_gen_in  => c0_wrd_gen,
@@ -198,6 +219,11 @@ BEGIN
 		w_b         => c0_word_byte,
 		wr_out_in   => c0_wr_out,
 		special_in  => c0_special,
+		a_sys_in    => c0_a_sys,
+		in_d_in     => c0_in_d,
+		addr_a_in   => c0_addr_a,
+		addr_d_in   => c0_addr_d,
+		tkn_jmp_in  => c0_tkn_jmp,
 		--Output signals (filtered)
 		ldpc_out    => m0_ldpc,
 		wrd_gen_out => wrd_gen,
@@ -207,7 +233,12 @@ BEGIN
 		ins_dad     => ins_dad,
 		word_byte   => word_byte,
 		wr_out      => wr_out,
-		special_out => special
+		special_out => special,
+		a_sys_out   => a_sys,
+		in_d_out    => in_d,
+		addr_a_out   => addr_a,
+		addr_d_out   => addr_d,
+		tkn_jmp_out  => m0_tkn_jmp
 	);
 
 	immed <= c0_immed;

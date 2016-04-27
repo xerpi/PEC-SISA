@@ -10,6 +10,7 @@ ENTITY control_l_special IS
 	    PORT (ir              : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		  ldpc_in         : IN STD_LOGIC;
 		  ldpc_out        : OUT STD_LOGIC;
+		  -- falta para cuando es un RDS | wrd_gen         : INOUT STD_LOGIC;
 		  wrd_sys         : OUT STD_LOGIC;
 		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0));
 END control_l_special;

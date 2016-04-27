@@ -19,10 +19,13 @@ ENTITY controladores_IO IS
 		HEX3       : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
 		SW         : IN STD_LOGIC_VECTOR(9 DOWNTO 0);
 		KEY        : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+		-- keyboard control
 		ps2_clk    : inout std_logic;
 		ps2_data   : inout std_logic;
+		--vga control
 		vga_cursor : out std_logic_vector(15 downto 0);
-		vga_cursor_enable : out std_logic);
+		vga_cursor_enable : out std_logic;
+		intr: out std_logic);
 END controladores_IO;
 
 ARCHITECTURE Structure OF controladores_IO IS
@@ -55,7 +58,12 @@ ARCHITECTURE Structure OF controladores_IO IS
 	signal kc0_clear_char: std_logic;
 	signal kc0_data_ready: std_logic;
 
+	--signal tmp_intr : std_logic := '1'; to generate clock like interrupts
+
 BEGIN
+	--tmp_intr <= not tmp_intr after 4*640 ns; to generate clock like interrupts
+	--intr <= tmp_intr; to generate clock like interrupts
+	intr <= '0';
 
 	d0: driver7Segmentos port map(
 		codigoCaracter => io_ports(10)(3 downto 0),

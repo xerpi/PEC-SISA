@@ -18,6 +18,7 @@ END regfile_system;
 
 ARCHITECTURE Structure OF regfile_system IS
 	type REGISTERS_T is array (7 downto 0) of std_logic_vector(15 downto 0);
+	--signal registers: REGISTERS_T := (others => X"C000"); use this to do a loop in gtkwave
 	signal registers: REGISTERS_T := (others => (others => '0'));
 BEGIN
 	process(clk)
@@ -27,9 +28,9 @@ BEGIN
 				registers(to_integer(unsigned(addr_d))) <= d;
 			end if;
 			if special = special_ei then
-				registers(7)(1) <= '0';
-			elsif special = special_di then
 				registers(7)(1) <= '1';
+			elsif special = special_di then
+				registers(7)(1) <= '0';
 			elsif special = special_reti then
 				--wrd_sys should be 1
 				--addr_a should be 1 (PC <- S1)
@@ -41,7 +42,7 @@ BEGIN
 				registers(0) <= registers(7); --restore status (S0 <- S7)
 				registers(1) <= d;            --S1 <- PCup
 				registers(2) <= X"000F";      --event is an interrupt (S2 <- 0x000F)
-				registers(7)(1) <= '1';       --disable interrupts (S7<1> <- 0)
+				registers(7)(1) <= '0';       --disable interrupts (S7<1> <- 0)
 			end if;
 		end if;
 	end process;
