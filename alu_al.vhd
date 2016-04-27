@@ -32,7 +32,10 @@ ARCHITECTURE Structure OF alu_al IS
 	signal sh_l_w: std_logic_vector(15 downto 0);
 	signal sh_ra_w: std_logic_vector(15 downto 0);
 	signal sh_rl_w: std_logic_vector(15 downto 0);
+
+	signal y_4_dt_0 : std_logic_vector(4 downto 0);
 BEGIN
+	y_4_dt_0 <= y(4 downto 0);
 
 	and_w <= x and y;
 	or_w <= x or y;
@@ -41,16 +44,16 @@ BEGIN
 	add_w <= std_logic_vector(unsigned(x) + unsigned(y));
 	sub_w <= std_logic_vector(unsigned(x) - unsigned(y));
 
-	sh_l_w <= std_logic_vector(shift_left(unsigned(x), to_integer(abs(signed(y)))));
-	sh_ra_w <= std_logic_vector(shift_right(signed(x), to_integer(abs(signed(y)))));
-	sh_rl_w <= std_logic_vector(shift_right(unsigned(x), to_integer(abs(signed(y)))));
+	sh_l_w <= std_logic_vector(shift_left(unsigned(x), to_integer(abs(signed(y_4_dt_0)))));
+	sh_ra_w <= std_logic_vector(shift_right(signed(x), to_integer(abs(signed(y_4_dt_0)))));
+	sh_rl_w <= std_logic_vector(shift_right(unsigned(x), to_integer(abs(signed(y_4_dt_0)))));
 
-	with signed(y) >= 0 select
+	with signed(y_4_dt_0) >= 0 select
 		sha_w <=
 			sh_l_w when true,
 			sh_ra_w when others;
 
-	with signed(y) >= 0 select
+	with signed(y_4_dt_0) >= 0 select
 		shl_w <=
 			sh_l_w when true,
 			sh_rl_w when others;
