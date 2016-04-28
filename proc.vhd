@@ -131,7 +131,7 @@ BEGIN
 		a_sys => uc0_a_sys,
 		special => uc0_special,
 		inten => dp0_inten,
-		--inten => '1', use this to test in gtkwave
+		--inten => '0', --use this to test in gtkwave
 		intr => intr
 	);
 

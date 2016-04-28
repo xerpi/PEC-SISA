@@ -39,10 +39,9 @@ BEGIN
 		ldpc_stop when func = F_HALT and opcode = SPECIAL else
 		ldpc_in;
 
-	with func select
-		wrd_sys <=
-			'1' when F_WRS,  --Only write to the system regile when WRS
-			'0' when others;
+	wrd_sys <=
+		'1' when func = F_WRS and opcode = SPECIAL else  --Only write to the system regile when WRS
+		'0';
 
 	sys_reg_special <=
 		special_ei when func = F_EI and opcode = SPECIAL else

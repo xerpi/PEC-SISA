@@ -29,8 +29,8 @@ ENTITY controladores_IO IS
 END controladores_IO;
 
 ARCHITECTURE Structure OF controladores_IO IS
-	type IO_PORTS_T is array (255 downto 0) of std_logic_vector(15 downto 0);
-	--type IO_PORTS_T is array (21 downto 0) of std_logic_vector(15 downto 0);
+	--type IO_PORTS_T is array (255 downto 0) of std_logic_vector(15 downto 0);
+	type IO_PORTS_T is array (21 downto 0) of std_logic_vector(15 downto 0);
 	signal io_ports: IO_PORTS_T := (others => (others => '0'));
 
 	COMPONENT driver7Segmentos IS
@@ -63,7 +63,7 @@ ARCHITECTURE Structure OF controladores_IO IS
 BEGIN
 	--tmp_intr <= not tmp_intr after 4*640 ns; to generate clock like interrupts
 	--intr <= tmp_intr; to generate clock like interrupts
-	intr <= '0';
+	intr <= SW(0);
 
 	d0: driver7Segmentos port map(
 		codigoCaracter => io_ports(10)(3 downto 0),
