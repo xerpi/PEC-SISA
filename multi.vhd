@@ -88,7 +88,7 @@ begin
 
 	agregate_in_demw   <= wr_out_in & wrd_sys_in & wrd_gen_in & wr_m_in & w_b & ldpc_in;
 	-- w_b doesn't matter, force ldpc
-	agregate_in_system <=    '0'    &     '1'    &     '0'    &   '0'   & w_b & ldpc_continue;
+	agregate_in_system <=    '0'    &     '1'    &     '0'    &   '0'   & w_b & ldpc_in;
 
 	with state select
 		agregate_out <=

@@ -25,7 +25,10 @@ ENTITY controladores_IO IS
 		--vga control
 		vga_cursor : out std_logic_vector(15 downto 0);
 		vga_cursor_enable : out std_logic;
-		intr: out std_logic);
+		-- interrupt request
+		intr       : out std_logic;
+		-- Interrupt ack
+		inta       : in std_logic);
 END controladores_IO;
 
 ARCHITECTURE Structure OF controladores_IO IS
@@ -49,6 +52,32 @@ ARCHITECTURE Structure OF controladores_IO IS
 				 data_ready : out   STD_LOGIC);
 	END COMPONENT;
 
+	COMPONENT keys_controller IS
+	PORT (boot   : IN STD_LOGIC;
+		clk       : IN STD_LOGIC;
+		inta      : IN STD_LOGIC;
+		intr      : OUT STD_LOGIC;
+		keys      : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+		read_keys : OUT STD_LOGIC_VECTOR(3 DOWNTO 0));
+	END COMPONENT;
+	
+	COMPONENT interrupt_controller IS
+		PORT (boot     : IN STD_LOGIC;
+			clk         : IN STD_LOGIC;
+			intr        : OUT STD_LOGIC;
+			--Interrupt devices
+			key_intr    : IN STD_LOGIC;
+			ps2_intr    : IN STD_LOGIC;
+			switch_intr : IN STD_LOGIC;
+			timer_intr  : IN STD_LOGIC;
+			inta        : IN STD_LOGIC;
+			key_inta    : OUT STD_LOGIC;
+			ps2_inta    : OUT STD_LOGIC;
+			switch_inta : OUT STD_LOGIC;
+			timer_inta  : OUT STD_LOGIC;
+			iid         : OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
+	END COMPONENT;
+
 	signal cycles_counter: std_logic_vector(15 downto 0) := (others => '0');
 	signal milliseconds_counter: std_logic_vector(15 downto 0) := (others => '0');
 
@@ -57,13 +86,17 @@ ARCHITECTURE Structure OF controladores_IO IS
 	signal kc0_read_char: std_logic_vector(7 downto 0);
 	signal kc0_clear_char: std_logic;
 	signal kc0_data_ready: std_logic;
+	
+	signal keys_controller0_intr: std_logic;
+	signal keys_controller0_inta: std_logic;
+	signal keys_controller0_read_keys: std_logic_vector(3 downto 0);
 
 	--signal tmp_intr : std_logic := '1'; to generate clock like interrupts
 
 BEGIN
 	--tmp_intr <= not tmp_intr after 4*640 ns; to generate clock like interrupts
 	--intr <= tmp_intr; to generate clock like interrupts
-	intr <= SW(0);
+	--intr <= SW(0);
 
 	d0: driver7Segmentos port map(
 		codigoCaracter => io_ports(10)(3 downto 0),
@@ -98,6 +131,31 @@ BEGIN
 		clear_char => kc0_clear_char,
 		data_ready => kc0_data_ready
 	);
+	
+	keys_controller0: keys_controller port map(
+		boot => boot,
+		clk => CLOCK_50,
+		inta => keys_controller0_inta,
+		intr => keys_controller0_intr,
+		keys => KEY,
+		read_keys => keys_controller0_read_keys
+	);
+	
+	intctrl0: interrupt_controller port map(
+		boot => boot,
+		clk => CLOCK_50,
+		intr => intr,
+		key_intr => keys_controller0_intr,
+		ps2_intr => '0',
+		switch_intr => '0',
+		timer_intr => '0',
+		inta => inta,
+		key_inta => keys_controller0_inta,
+		ps2_inta => open,
+		switch_inta => open,
+		timer_inta => open,
+		iid => open
+	);
 
 	with addr_io select
 		wr_out_new <=
@@ -126,7 +184,7 @@ BEGIN
 				end if;
 			end if;
 			--Inputs hardcoded
-			io_ports(7)(3 downto 0) <= KEY;
+			io_ports(7)(3 downto 0) <= keys_controller0_read_keys;
 			io_ports(8)(7 downto 0) <= SW(7 downto 0);
 			io_ports(20) <= cycles_counter;
 			io_ports(21) <= milliseconds_counter;

@@ -32,7 +32,9 @@ ENTITY control_l IS
 		-- Selects General/System regfile
 		a_sys       : OUT STD_LOGIC;
 		--Special operation to perform in the system regfile
-		special     : OUT STD_LOGIC_VECTOR(2 downto 0));
+		special     : OUT STD_LOGIC_VECTOR(2 downto 0);
+		--Interrupt ack
+		inta      : OUT STD_LOGIC);
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
@@ -63,6 +65,9 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_special_ldpc    : std_logic;
 	signal c0_special_wrd_sys : std_logic;
 	signal c0_special_special : std_logic_vector(2 downto 0);
+	signal c0_special_addr_a  : std_logic_vector(2 downto 0);
+	signal c0_special_abs_jmp_tkn : std_logic;
+	signal c0_special_wrd_gen : std_logic;
 
 	signal opcode             : std_logic_vector(3 downto 0);
 
@@ -79,8 +84,7 @@ ARCHITECTURE Structure OF control_l IS
 			wr_m      : OUT STD_LOGIC;
 			in_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			word_byte : OUT STD_LOGIC;
-			alu_immed : OUT STD_LOGIC;
-			a_sys     : OUT STD_LOGIC);
+			alu_immed : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT control_l_mov IS
@@ -110,8 +114,17 @@ ARCHITECTURE Structure OF control_l IS
 	    PORT (ir              : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		  ldpc_in         : IN STD_LOGIC;
 		  ldpc_out        : OUT STD_LOGIC;
+		  addr_a_in       : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		  addr_a_out      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+		  abs_jmp_tkn_in  : IN STD_LOGIC;
+		  abs_jmp_tkn_out : OUT STD_LOGIC;
+		  wrd_gen_in         : IN STD_LOGIC;
+		  wrd_gen_out         : OUT STD_LOGIC;
 		  wrd_sys         : OUT STD_LOGIC;
-		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0));
+		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0);
+		  a_sys           : OUT STD_LOGIC;
+		   --Interrupt ack
+		   inta      : OUT STD_LOGIC);
 	END COMPONENT;
 
 
@@ -131,8 +144,7 @@ BEGIN
 		wr_m => c0_g_wr_m,
 		in_d => c0_g_in_d,
 		word_byte => c0_g_word_byte,
-		alu_immed => c0_g_alu_immed,
-		a_sys => a_sys
+		alu_immed => c0_g_alu_immed
 	);
 
 	c0_mov: control_l_mov port map(
@@ -162,15 +174,23 @@ BEGIN
 		ir => ir,
 		ldpc_in => c0_g_ldpc,
 		ldpc_out => c0_special_ldpc,
+		addr_a_in => c0_g_addr_a,
+		addr_a_out => c0_special_addr_a,
+		abs_jmp_tkn_in => c0_jmp_abs_jmp_tkn,
+		abs_jmp_tkn_out => c0_special_abs_jmp_tkn,
+		wrd_gen_in => c0_io_wrd_gen,
+		wrd_gen_out => c0_special_wrd_gen,
 		wrd_sys => c0_special_wrd_sys,
-		sys_reg_special => c0_special_special
+		sys_reg_special => c0_special_special,
+		a_sys => a_sys,
+		inta => inta
 	);
 
 	op <= c0_g_op;
 
 	ldpc <= c0_special_ldpc;
 
-	addr_a <= c0_g_addr_a;
+	addr_a <= c0_special_addr_a;
 	addr_b <= c0_g_addr_b;
 	addr_d <= c0_g_addr_d;
 	immed <= c0_g_immed;
@@ -181,11 +201,11 @@ BEGIN
 
 	func <= c0_mov_func;
 
-	wrd_gen <= c0_io_wrd_gen;
+	wrd_gen <= c0_special_wrd_gen;
 	wrd_sys <= c0_special_wrd_sys;
 	special <= c0_special_special;
 	rel_jmp_tkn <= c0_jmp_rel_jmp_tkn;
-	abs_jmp_tkn <= c0_jmp_abs_jmp_tkn;
+	abs_jmp_tkn <= c0_special_abs_jmp_tkn;
 
 	wr_out <= c0_io_wr_out;
 	rd_in <= c0_io_rd_in;

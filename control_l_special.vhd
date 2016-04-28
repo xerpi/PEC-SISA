@@ -10,9 +10,18 @@ ENTITY control_l_special IS
 	    PORT (ir              : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		  ldpc_in         : IN STD_LOGIC;
 		  ldpc_out        : OUT STD_LOGIC;
+		  addr_a_in       : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		  addr_a_out      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+		  abs_jmp_tkn_in  : IN STD_LOGIC;
+		  abs_jmp_tkn_out : OUT STD_LOGIC;
 		  -- falta para cuando es un RDS | wrd_gen         : INOUT STD_LOGIC;
+		  wrd_gen_in         : IN STD_LOGIC;
+		  wrd_gen_out         : OUT STD_LOGIC;
 		  wrd_sys         : OUT STD_LOGIC;
-		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0));
+		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0);
+		  a_sys           : OUT STD_LOGIC;
+			--Interrupt ack
+			inta      : OUT STD_LOGIC);
 END control_l_special;
 
 ARCHITECTURE Structure OF control_l_special IS
@@ -42,11 +51,32 @@ BEGIN
 	wrd_sys <=
 		'1' when func = F_WRS and opcode = SPECIAL else  --Only write to the system regile when WRS
 		'0';
+		
+	wrd_gen_out <=
+		'1' when func = F_RDS and opcode = SPECIAL else  --Only write to the system regile when WRS
+		wrd_gen_in;
+		
+	addr_a_out <=
+		"001" when func = F_RETI and opcode = SPECIAL else --Output S1 when RETI
+		addr_a_in;
+		
+	a_sys <=
+		'1' when opcode = SPECIAL and not (func = F_WRS) else --If special and not WRS instruction, select SYSTEM regfile
+		'0';
+	
+	abs_jmp_tkn_out <=
+		'1' when opcode = SPECIAL and func = F_RETI else
+		abs_jmp_tkn_in;
+		
+	inta <=
+		'1' when opcode = SPECIAL and func = F_GETIID else --If instr is GETIID, send ack
+		'0';
 
 	sys_reg_special <=
 		special_ei when func = F_EI and opcode = SPECIAL else
 		special_di when func = F_DI and opcode = SPECIAL else
 		special_reti when func = F_RETI and opcode = SPECIAL else
 		special_none;
+		
 
 END Structure;

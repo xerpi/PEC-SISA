@@ -9,17 +9,6 @@ ENTITY alu_cmp IS
           w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
 END alu_cmp;
 
--- F          OP = 11       OP = 10                OP = 01                  OP = 00
--------- ------------ ------------- ---------------------- ------------------------
--- 000         MUL           Y             CMPLT(X, Y)             AND(X, Y)
--- 001         MULH   MOVHI = Y & LOW(X)   CMPLE(X, Y)             OR(X, Y)
--- 010         MULHU        ---               ---                  XOR(X,Y)
--- 011         ---          ---            CMPEQ(X, Y)             NOT(X)
--- 100         DIV          ---            CMPLTU(X, Y)            ADD(X, Y)
--- 101         DIVU         ---            CMPLEU(X, Y)            SUB(X, Y)
--- 110         ---          ---            ---                     SHA(X ,Y)
--- 111         ---          ---            ---                     SHL(X, Y)
-
 
 ARCHITECTURE Structure OF alu_cmp IS
 

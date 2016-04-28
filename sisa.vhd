@@ -52,7 +52,8 @@ ARCHITECTURE Structure OF sisa IS
 		rd_io     : IN STD_LOGIC_VECTOR(15 downto 0);
 		wr_out    : OUT STD_LOGIC;
 		rd_in     : OUT STD_LOGIC;
-		intr      : IN STD_LOGIC);
+		intr      : IN STD_LOGIC;
+		inta      : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT controladores_IO IS
@@ -78,7 +79,9 @@ ARCHITECTURE Structure OF sisa IS
 		vga_cursor : out std_logic_vector(15 downto 0);
 		vga_cursor_enable : out std_logic;
 		-- interrupt request
-		intr: out std_logic);
+		intr       : out std_logic;
+		-- Interrupt ack
+		inta       : in std_logic);
 	END COMPONENT;
 
 	COMPONENT MemoryController is
@@ -128,6 +131,7 @@ ARCHITECTURE Structure OF sisa IS
 	signal proc0_wr_m: std_logic;
 	signal proc0_addr_m: std_logic_vector(15 downto 0);
 	signal proc0_data_wr: std_logic_vector(15 downto 0);
+	signal proc0_inta: std_logic;
 
 	signal proc0_addr_io: std_logic_vector(7 downto 0);
 	signal proc0_wr_io: std_logic_vector(15 downto 0);
@@ -179,7 +183,8 @@ BEGIN
 		rd_io => proc0_rd_io,
 		wr_out => proc0_wr_out,
 		rd_in => proc0_rd_in,
-		intr => io0_intr
+		intr => io0_intr,
+		inta => proc0_inta
 	);
 
 	io0: controladores_IO port map(
@@ -202,7 +207,8 @@ BEGIN
 		ps2_data => PS2_DAT,
 		vga_cursor => io0_vga_cursor,
 		vga_cursor_enable => io0_vga_cursor_enable,
-		intr => io0_intr
+		intr => io0_intr,
+		inta => proc0_inta
 	);
 
 	mc0: MemoryController port map(

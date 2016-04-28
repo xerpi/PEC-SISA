@@ -33,7 +33,9 @@ ENTITY unidad_control IS
 		special   : OUT STD_LOGIC_VECTOR(2 downto 0);
 		inten     : IN STD_LOGIC;
 		--Interrupt request
-		intr      : IN STD_LOGIC);
+		intr      : IN STD_LOGIC;
+		--Interrupt ack
+		inta      : OUT STD_LOGIC);
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -69,7 +71,9 @@ ARCHITECTURE Structure OF unidad_control IS
 			-- Selects General/System regfile
 			a_sys     : OUT STD_LOGIC;
 			--Special operation to perform in the system regfile
-			special   : OUT STD_LOGIC_VECTOR(2 downto 0));
+			special   : OUT STD_LOGIC_VECTOR(2 downto 0);
+			--Interrupt ack
+			inta      : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT multi is
@@ -203,7 +207,8 @@ BEGIN
 		wr_out => c0_wr_out,
 		rd_in => rd_in,
 		a_sys => c0_a_sys,
-		special => c0_special
+		special => c0_special,
+		inta => inta
 	);
 
 	m0: multi port map(

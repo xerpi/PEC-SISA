@@ -32,7 +32,6 @@ BEGIN
 			elsif special = special_di then
 				registers(7)(1) <= '0';
 			elsif special = special_reti then
-				--wrd_sys should be 1
 				--addr_a should be 1 (PC <- S1)
 				registers(7) <= registers(0);
 			elsif special = special_start_int then

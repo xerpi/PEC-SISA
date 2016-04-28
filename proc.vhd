@@ -14,7 +14,8 @@ ENTITY proc IS
 			rd_io     : IN STD_LOGIC_VECTOR(15 downto 0);
 			wr_out    : OUT STD_LOGIC;
 			rd_in     : OUT STD_LOGIC;
-			intr      : IN STD_LOGIC);
+			intr      : IN STD_LOGIC;
+			inta      : OUT STD_LOGIC);
 END proc;
 
 ARCHITECTURE Structure OF proc IS
@@ -50,7 +51,9 @@ ARCHITECTURE Structure OF proc IS
 			--Interrupts enabled
 			inten     : IN STD_LOGIC;
 			--Interrupt request
-			intr      : IN STD_LOGIC);
+			intr      : IN STD_LOGIC;
+			--Interrupt ack
+			inta      : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT datapath IS
@@ -132,7 +135,8 @@ BEGIN
 		special => uc0_special,
 		inten => dp0_inten,
 		--inten => '0', --use this to test in gtkwave
-		intr => intr
+		intr => intr,
+		inta => inta
 	);
 
 	dp0: datapath port map(

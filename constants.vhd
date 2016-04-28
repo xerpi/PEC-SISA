@@ -16,6 +16,7 @@ package constants is
 	constant func_dec_mov        : std_logic_vector(2 downto 0) := B"000"; --MOVI
 	constant func_dec_movh       : std_logic_vector(2 downto 0) := B"001"; --MOVHI
 	constant func_dec_sum        : std_logic_vector(2 downto 0) := B"100"; --ALU ADD when memory instruction
+	constant func_dec_pass_x     : std_logic_vector(2 downto 0) := B"010";
 												     -- or ADDI
 
 	constant func_sel_dec        : std_logic_vector(1 downto 0) := B"00"; -- selects func decoded
