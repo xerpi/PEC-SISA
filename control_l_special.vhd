@@ -56,6 +56,7 @@ BEGIN
 
 	wrd_gen_out <=
 		'1' when func = F_RDS and opcode = SPECIAL else  --Only write to the system regile when WRS
+		'1' when func = F_GETIID and opcode = SPECIAL else  --Save iid in Rd
 		wrd_gen_in;
 
 	addr_a_out <=
