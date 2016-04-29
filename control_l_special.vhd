@@ -51,23 +51,23 @@ BEGIN
 	wrd_sys <=
 		'1' when func = F_WRS and opcode = SPECIAL else  --Only write to the system regile when WRS
 		'0';
-		
+
 	wrd_gen_out <=
 		'1' when func = F_RDS and opcode = SPECIAL else  --Only write to the system regile when WRS
 		wrd_gen_in;
-		
+
 	addr_a_out <=
 		"001" when func = F_RETI and opcode = SPECIAL else --Output S1 when RETI
 		addr_a_in;
-		
+
 	a_sys <=
-		'1' when opcode = SPECIAL and not (func = F_WRS) else --If special and not WRS instruction, select SYSTEM regfile
+		'1' when opcode = SPECIAL and func /= F_WRS else --If special and not WRS instruction, select SYSTEM regfile
 		'0';
-	
+
 	abs_jmp_tkn_out <=
 		'1' when opcode = SPECIAL and func = F_RETI else
 		abs_jmp_tkn_in;
-		
+
 	inta <=
 		'1' when opcode = SPECIAL and func = F_GETIID else --If instr is GETIID, send ack
 		'0';
@@ -77,6 +77,6 @@ BEGIN
 		special_di when func = F_DI and opcode = SPECIAL else
 		special_reti when func = F_RETI and opcode = SPECIAL else
 		special_none;
-		
+
 
 END Structure;

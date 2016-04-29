@@ -32,8 +32,8 @@ ENTITY controladores_IO IS
 END controladores_IO;
 
 ARCHITECTURE Structure OF controladores_IO IS
-	--type IO_PORTS_T is array (255 downto 0) of std_logic_vector(15 downto 0);
-	type IO_PORTS_T is array (21 downto 0) of std_logic_vector(15 downto 0);
+	type IO_PORTS_T is array (255 downto 0) of std_logic_vector(15 downto 0);
+	--type IO_PORTS_T is array (21 downto 0) of std_logic_vector(15 downto 0);
 	signal io_ports: IO_PORTS_T := (others => (others => '0'));
 
 	COMPONENT driver7Segmentos IS
@@ -60,7 +60,7 @@ ARCHITECTURE Structure OF controladores_IO IS
 		keys      : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 		read_keys : OUT STD_LOGIC_VECTOR(3 DOWNTO 0));
 	END COMPONENT;
-	
+
 	COMPONENT interrupt_controller IS
 		PORT (boot     : IN STD_LOGIC;
 			clk         : IN STD_LOGIC;
@@ -86,7 +86,7 @@ ARCHITECTURE Structure OF controladores_IO IS
 	signal kc0_read_char: std_logic_vector(7 downto 0);
 	signal kc0_clear_char: std_logic;
 	signal kc0_data_ready: std_logic;
-	
+
 	signal keys_controller0_intr: std_logic;
 	signal keys_controller0_inta: std_logic;
 	signal keys_controller0_read_keys: std_logic_vector(3 downto 0);
@@ -131,7 +131,7 @@ BEGIN
 		clear_char => kc0_clear_char,
 		data_ready => kc0_data_ready
 	);
-	
+
 	keys_controller0: keys_controller port map(
 		boot => boot,
 		clk => CLOCK_50,
@@ -140,7 +140,7 @@ BEGIN
 		keys => KEY,
 		read_keys => keys_controller0_read_keys
 	);
-	
+
 	intctrl0: interrupt_controller port map(
 		boot => boot,
 		clk => CLOCK_50,

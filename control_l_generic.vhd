@@ -69,7 +69,7 @@ BEGIN
 			'X'            & addr_b_11_dt_9 & "XX"           & "XXX"           & "XX"            & immed_sel_se_eight    & wrd_deny & wr_m_deny  & ldpc_continue & in_d_io     & 'X'         & "X"             when IN_OUT,
 
 			--Special instuctions
-			addr_a_8_dt_6  & 'X'            & op_misc_unit   & func_dec_pass_x & "XX"            & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & "XXX"       & 'X'         & 'X'             when SPECIAL, -- HALT by default
+			addr_a_8_dt_6  & 'X'            & op_misc_unit   & func_dec_pass_x & func_sel_dec    & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & 'X'             when SPECIAL, -- HALT by default
 
 
 			(others => 'X')  when others;
