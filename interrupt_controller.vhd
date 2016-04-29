@@ -20,17 +20,29 @@ ENTITY interrupt_controller IS
 END interrupt_controller;
 
 ARCHITECTURE Structure OF interrupt_controller IS
-
+	signal iid_buffer: std_logic_vector(3 downto 0) := (others => '0');
+	signal intr_aggregate: std_logic_vector(3 downto 0);
+	signal inta_aggregate: std_logic_vector(3 downto 0);
 BEGIN
+
+	intr_aggregate <= ps2_intr & switch_intr & key_intr & timer_intr;
 
 	process(clk)
 	begin
 		if rising_edge(clk) then
-
+			--Only keep the least significant bit set
+			iid_buffer <= intr_aggregate and std_logic_vector(unsigned(not(intr_aggregate)) + 1);
 		end if;
 	end process;
 
+	inta_aggregate <= (3 downto 0 => inta) and iid_buffer;
+
+	timer_inta  <= inta_aggregate(0);
+	key_inta    <= inta_aggregate(1);
+	switch_inta <= inta_aggregate(2);
+	ps2_inta    <= inta_aggregate(3);
+
 	intr <= key_intr or ps2_intr or switch_intr or timer_intr;
-	key_inta <= inta;
+	iid <= "0000" & iid_buffer;
 
 END Structure;
