@@ -68,6 +68,7 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_special_addr_a  : std_logic_vector(2 downto 0);
 	signal c0_special_abs_jmp_tkn : std_logic;
 	signal c0_special_wrd_gen : std_logic;
+	signal c0_special_in_d    : std_logic_vector(2 downto 0);
 
 	signal opcode             : std_logic_vector(3 downto 0);
 
@@ -123,6 +124,8 @@ ARCHITECTURE Structure OF control_l IS
 		  wrd_sys         : OUT STD_LOGIC;
 		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0);
 		  a_sys           : OUT STD_LOGIC;
+		  in_d_in         : IN STD_LOGIC_VECTOR(2 downto 0);
+		  in_d_out        : OUT STD_LOGIC_VECTOR(2 downto 0);
 		   --Interrupt ack
 		   inta      : OUT STD_LOGIC);
 	END COMPONENT;
@@ -183,6 +186,8 @@ BEGIN
 		wrd_sys => c0_special_wrd_sys,
 		sys_reg_special => c0_special_special,
 		a_sys => a_sys,
+		in_d_in => c0_g_in_d,
+		in_d_out => c0_special_in_d,
 		inta => inta
 	);
 
@@ -195,7 +200,7 @@ BEGIN
 	addr_d <= c0_g_addr_d;
 	immed <= c0_g_immed;
 	wr_m <= c0_g_wr_m;
-	in_d <= c0_g_in_d;
+	in_d <= c0_special_in_d;
 	word_byte <= c0_g_word_byte;
 	alu_immed <= c0_g_alu_immed;
 

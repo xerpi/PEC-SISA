@@ -91,6 +91,8 @@ ARCHITECTURE Structure OF controladores_IO IS
 	signal keys_controller0_inta: std_logic;
 	signal keys_controller0_read_keys: std_logic_vector(3 downto 0);
 
+	signal intctrl0_iid : std_logic_vector(7 downto 0);
+
 	--signal tmp_intr : std_logic := '1'; to generate clock like interrupts
 
 BEGIN
@@ -154,7 +156,7 @@ BEGIN
 		ps2_inta => open,
 		switch_inta => open,
 		timer_inta => open,
-		iid => open
+		iid => intctrl0_iid
 	);
 
 	with addr_io select
@@ -191,11 +193,12 @@ BEGIN
 		end if;
 	end process;
 
-	with addr_io select
-		rd_io <=
-			"00000000" & kc0_read_char when X"0F",
-			"000000000000000" & kc0_data_ready when X"10",
-			io_ports(to_integer(unsigned(addr_io))) when others;
+	rd_io <=
+		"00000000" & intctrl0_iid when inta = '1' else
+		-- addr_io may coincide by chance? First test if inta = 1
+		"00000000" & kc0_read_char when addr_io = X"0F" else
+		"000000000000000" & kc0_data_ready when addr_io = X"10" else
+		io_ports(to_integer(unsigned(addr_io)));
 
 	kc0_clear_char <=
 		'1' when addr_io = X"10" and wr_out_new = '1' else

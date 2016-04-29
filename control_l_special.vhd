@@ -20,6 +20,8 @@ ENTITY control_l_special IS
 		  wrd_sys         : OUT STD_LOGIC;
 		  sys_reg_special : OUT STD_LOGIC_VECTOR(2 downto 0);
 		  a_sys           : OUT STD_LOGIC;
+		  in_d_in         : IN STD_LOGIC_VECTOR(2 downto 0);
+		  in_d_out        : OUT STD_LOGIC_VECTOR(2 downto 0);
 			--Interrupt ack
 			inta      : OUT STD_LOGIC);
 END control_l_special;
@@ -71,6 +73,10 @@ BEGIN
 	inta <=
 		'1' when opcode = SPECIAL and func = F_GETIID else --If instr is GETIID, send ack
 		'0';
+
+	in_d_out <=
+		in_d_io when opcode = SPECIAL and func = F_GETIID else --If instr is GETIID, Rd = rd_io
+		in_d_in;
 
 	sys_reg_special <=
 		special_ei when func = F_EI and opcode = SPECIAL else

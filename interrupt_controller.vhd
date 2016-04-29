@@ -29,7 +29,8 @@ BEGIN
 
 		end if;
 	end process;
-	
+
 	intr <= key_intr or ps2_intr or switch_intr or timer_intr;
-	
+	key_inta <= inta;
+
 END Structure;

@@ -184,6 +184,7 @@ BEGIN
 		wr_out => proc0_wr_out,
 		rd_in => proc0_rd_in,
 		intr => io0_intr,
+		-- intr => '1',
 		inta => proc0_inta
 	);
 
