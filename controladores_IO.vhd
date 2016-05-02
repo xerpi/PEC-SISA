@@ -60,6 +60,22 @@ ARCHITECTURE Structure OF controladores_IO IS
 		keys      : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 		read_keys : OUT STD_LOGIC_VECTOR(3 DOWNTO 0));
 	END COMPONENT;
+	
+	COMPONENT sw_controller IS
+	PORT (boot   : IN STD_LOGIC;
+		clk       : IN STD_LOGIC;
+		inta      : IN STD_LOGIC;
+		intr      : OUT STD_LOGIC;
+		switches  : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+		rd_switch : OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
+	END COMPONENT;
+	
+	COMPONENT timer_controller IS
+	PORT (boot   : IN STD_LOGIC;
+		clk       : IN STD_LOGIC;
+		inta      : IN STD_LOGIC;
+		intr      : OUT STD_LOGIC);
+	END COMPONENT;
 
 	COMPONENT interrupt_controller IS
 		PORT (boot     : IN STD_LOGIC;
@@ -90,8 +106,16 @@ ARCHITECTURE Structure OF controladores_IO IS
 	signal keys_controller0_intr: std_logic;
 	signal keys_controller0_inta: std_logic;
 	signal keys_controller0_read_keys: std_logic_vector(3 downto 0);
+	
+	signal sw_controller0_intr: std_logic;
+	signal sw_controller0_inta: std_logic;
+	signal sw_controller0_rd_switches: std_logic_vector(7 downto 0);
+	
+	signal timer_controller0_intr: std_logic;
+	signal timer_controller0_inta: std_logic;
 
 	signal intctrl0_iid : std_logic_vector(7 downto 0);
+	signal intctrl0_ps2_inta: std_logic;
 
 	--signal tmp_intr : std_logic := '1'; to generate clock like interrupts
 
@@ -142,20 +166,37 @@ BEGIN
 		keys => KEY,
 		read_keys => keys_controller0_read_keys
 	);
+	
+	sw_controller0: sw_controller port map(
+		boot => boot,
+		clk => CLOCK_50,
+		inta => sw_controller0_inta,
+		intr => sw_controller0_intr,
+		switches => SW(7 downto 0),
+		rd_switch => sw_controller0_rd_switches
+	);
+	
+	timer_controller0: timer_controller port map(
+		boot => boot,
+		clk => CLOCK_50,
+		inta => timer_controller0_inta,
+		intr => timer_controller0_intr
+	);
+	
 
 	intctrl0: interrupt_controller port map(
 		boot => boot,
 		clk => CLOCK_50,
 		intr => intr,
 		key_intr => keys_controller0_intr,
-		ps2_intr => '0',
-		switch_intr => '0',
-		timer_intr => '0',
+		ps2_intr => kc0_data_ready,
+		switch_intr => sw_controller0_intr,
+		timer_intr => timer_controller0_intr,
 		inta => inta,
 		key_inta => keys_controller0_inta,
-		ps2_inta => open,
-		switch_inta => open,
-		timer_inta => open,
+		ps2_inta => intctrl0_ps2_inta,
+		switch_inta => sw_controller0_inta,
+		timer_inta => timer_controller0_inta,
 		iid => intctrl0_iid
 	);
 
@@ -187,7 +228,7 @@ BEGIN
 			end if;
 			--Inputs hardcoded
 			io_ports(7)(3 downto 0) <= keys_controller0_read_keys;
-			io_ports(8)(7 downto 0) <= SW(7 downto 0);
+			io_ports(8)(7 downto 0) <= sw_controller0_rd_switches;
 			io_ports(20) <= cycles_counter;
 			io_ports(21) <= milliseconds_counter;
 		end if;
@@ -202,6 +243,7 @@ BEGIN
 
 	kc0_clear_char <=
 		'1' when addr_io = X"10" and wr_out_new = '1' else
+		'1' when intctrl0_ps2_inta = '1' else
 		'0';
 
 	--Outputs
