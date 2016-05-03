@@ -27,9 +27,9 @@ BEGIN
 
 	intr_aggregate <= ps2_intr & switch_intr & key_intr & timer_intr;
 
-	process(clk)
+	process(inta)
 	begin
-		if rising_edge(clk) then
+		if rising_edge(inta) then
 			--Only keep the least significant bit set
 			iid_buffer <= intr_aggregate and std_logic_vector(unsigned(not(intr_aggregate)) + 1);
 		end if;
@@ -43,6 +43,11 @@ BEGIN
 	ps2_inta    <= inta_aggregate(3);
 
 	intr <= key_intr or ps2_intr or switch_intr or timer_intr;
-	iid <= "0000" & iid_buffer;
+	iid <= 
+		X"00" when iid_buffer = X"1" else
+		X"01" when iid_buffer = X"2" else
+		X"02" when iid_buffer = X"4" else
+		X"03" when iid_buffer = X"8" else
+		X"00";
 
 END Structure;
