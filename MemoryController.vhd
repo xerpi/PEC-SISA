@@ -17,12 +17,14 @@ entity MemoryController is
           SRAM_CE_N : out   std_logic := '1';
           SRAM_OE_N : out   std_logic := '1';
           SRAM_WE_N : out   std_logic := '1';
-			--VGA 
+			--VGA
 			vga_addr    : out std_logic_vector(12 downto 0);
 			vga_we      : out std_logic;
 			vga_wr_data : out std_logic_vector(15 downto 0);
 			vga_rd_data : in std_logic_vector(15 downto 0);
-			vga_byte_m  : out std_logic);
+			vga_byte_m  : out std_logic;
+			--Unaligned access
+			unaligned_access : out std_logic);
 end MemoryController;
 
 architecture comportament of MemoryController is
@@ -72,20 +74,21 @@ begin
 		'0' when addr >= X"C000" else --Disable writes to program code
 		'0' when addr >= X"A000" else --VGA RAM
 		we;
-		
+
 	vga_we <=
 		'1' when addr >= X"A000" and addr < X"C000" and we = '1' else --VGA RAM
 		'0';
-		
+
 	rd_data <=
 		vga_rd_data when addr >= X"A000" and addr < X"C000" else --VGA RAM
 		sc0_dataReaded;
-		
+
 	vga_addr <= addr(12 downto 0);
 	vga_wr_data <= wr_data;
 	vga_byte_m <= byte_m;
-	
-	
+
+	unaligned_access <= addr(0) and not byte_m;
+
 	--with addr >= X"C000" select
 	--	we_sram <= '0' when true,
 	--		we when others;

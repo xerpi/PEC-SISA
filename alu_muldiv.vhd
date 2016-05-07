@@ -6,7 +6,8 @@ ENTITY alu_muldiv IS
     PORT (x    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
           y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
           func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-          w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+          w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+			 div_by_zero: OUT STD_LOGIC);
 END alu_muldiv;
 
 -- F          OP = 11       OP = 10                OP = 01                  OP = 00
@@ -48,6 +49,11 @@ BEGIN
 
 	div_s <= std_logic_vector(signed(x) / signed(dividend));
 	div_u <= std_logic_vector(unsigned(x) / unsigned(dividend));
+
+	div_by_zero <=
+		'1' when func = F_DIV and unsigned(y) = 0 else
+		'1' when func = F_DIVU and unsigned(y) = 0 else
+		'0';
 
 	with func select
 		w <=

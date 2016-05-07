@@ -109,4 +109,3 @@ architecture vga_sync_arch of vga_sync is
     pixel_column <= h_count_reg;
 
 end vga_sync_arch;
-

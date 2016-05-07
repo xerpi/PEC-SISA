@@ -22,7 +22,7 @@ BEGIN
 			if intr_pending = '1' and inta = '1' then
 				intr_pending <= '0';
 			end if;
-			
+
 			if switches /= sw_buffer and intr_pending = '0' then
 				intr_pending <= '1';
 				sw_buffer <= switches;
@@ -32,5 +32,5 @@ BEGIN
 
 	rd_switch <= sw_buffer;
 	intr <= intr_pending;
-	
+
 END Structure;

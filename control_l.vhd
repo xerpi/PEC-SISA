@@ -34,7 +34,9 @@ ENTITY control_l IS
 		--Special operation to perform in the system regfile
 		special     : OUT STD_LOGIC_VECTOR(2 downto 0);
 		--Interrupt ack
-		inta      : OUT STD_LOGIC);
+		inta      : OUT STD_LOGIC;
+		--Exception requests
+		exc_illegal_instr : OUT STD_LOGIC);
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
@@ -85,7 +87,9 @@ ARCHITECTURE Structure OF control_l IS
 			wr_m      : OUT STD_LOGIC;
 			in_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			word_byte : OUT STD_LOGIC;
-			alu_immed : OUT STD_LOGIC);
+			alu_immed : OUT STD_LOGIC;
+			--Exception requests
+			exc_illegal_instr : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT control_l_mov IS
@@ -147,7 +151,8 @@ BEGIN
 		wr_m => c0_g_wr_m,
 		in_d => c0_g_in_d,
 		word_byte => c0_g_word_byte,
-		alu_immed => c0_g_alu_immed
+		alu_immed => c0_g_alu_immed,
+		exc_illegal_instr => exc_illegal_instr
 	);
 
 	c0_mov: control_l_mov port map(

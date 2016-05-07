@@ -44,9 +44,9 @@ BEGIN
 	add_w <= std_logic_vector(unsigned(x) + unsigned(y));
 	sub_w <= std_logic_vector(unsigned(x) - unsigned(y));
 
-	sh_l_w <= std_logic_vector(shift_left(unsigned(x), to_integer(abs(signed(y_4_dt_0)))));
-	sh_ra_w <= std_logic_vector(shift_right(signed(x), to_integer(abs(signed(y_4_dt_0)))));
-	sh_rl_w <= std_logic_vector(shift_right(unsigned(x), to_integer(abs(signed(y_4_dt_0)))));
+	sh_l_w <= std_logic_vector(shift_left(unsigned(x), to_integer(unsigned(std_logic_vector(abs(signed(y_4_dt_0)))))));
+	sh_ra_w <= std_logic_vector(shift_right(signed(x), to_integer(unsigned(std_logic_vector(abs(signed(y_4_dt_0)))))));
+	sh_rl_w <= std_logic_vector(shift_right(unsigned(x), to_integer(unsigned(std_logic_vector(abs(signed(y_4_dt_0)))))));
 
 	with signed(y_4_dt_0) >= 0 select
 		sha_w <=

@@ -53,11 +53,20 @@ package constants is
 	constant alu_immed_immed     : std_logic := '1'; --select immed
 	constant alu_immed_alu       : std_logic := '0'; -- select alu output
 
+	constant legal_instruction   : std_logic := '0';
+	constant illegal_instruction : std_logic := '1';
+
 	--Special operation to perform in the system regfile
 	constant special_none        : std_logic_vector(2 downto 0) := B"000";
 	constant special_ei          : std_logic_vector(2 downto 0) := B"001";
 	constant special_di          : std_logic_vector(2 downto 0) := B"010";
 	constant special_reti        : std_logic_vector(2 downto 0) := B"011";
 	constant special_start_int   : std_logic_vector(2 downto 0) := B"100"; --Used to trigger the interrupt
+
+	--Exceptions IDs
+	constant exception_illegal_instr    : std_logic_vector(3 downto 0) := X"0";
+	constant exception_unaligned_access : std_logic_vector(3 downto 0) := X"1";
+	constant exception_division_by_zero : std_logic_vector(3 downto 0) := X"4";
+	constant exception_interrupt        : std_logic_vector(3 downto 0) := X"F";
 
 end constants;

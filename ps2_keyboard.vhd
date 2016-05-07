@@ -730,6 +730,3 @@ BEGIN
 
 
 END ARCHITECTURE trans;
-
-
-

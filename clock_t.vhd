@@ -3,7 +3,7 @@ USE ieee.std_logic_1164.all;
 USE IEEE.std_logic_arith.all;
 USE IEEE.std_logic_unsigned.all;
 
-ENTITY clock_t IS	
+ENTITY clock_t IS
 	GENERIC ( limits : integer := 25_000_000
 	        );
 	PORT(CLOCK_IN : IN std_logic;
@@ -27,8 +27,8 @@ BEGIN
 			end if;
 		end if;
 	end process;
-	
+
 	CLOCK_OUT <= tmp_out;
 
 
-END Structure; 
+END Structure;

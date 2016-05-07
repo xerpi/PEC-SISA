@@ -32,10 +32,17 @@ ENTITY unidad_control IS
 		--Special operation to perform in the system regfile
 		special   : OUT STD_LOGIC_VECTOR(2 downto 0);
 		inten     : IN STD_LOGIC;
+		--div_by_zero enable;
+		div_z_en  : IN STD_LOGIC;
 		--Interrupt request
 		intr      : IN STD_LOGIC;
 		--Interrupt ack
-		inta      : OUT STD_LOGIC);
+		inta      : OUT STD_LOGIC;
+		--Interrupt ID
+		int_id    : OUT STD_LOGIC_VECTOR(3 downto 0);
+		--Unaligned access
+		unaligned_access : IN STD_LOGIC;
+		div_by_zero: IN STD_LOGIC);
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -73,7 +80,9 @@ ARCHITECTURE Structure OF unidad_control IS
 			--Special operation to perform in the system regfile
 			special   : OUT STD_LOGIC_VECTOR(2 downto 0);
 			--Interrupt ack
-			inta      : OUT STD_LOGIC);
+			inta      : OUT STD_LOGIC;
+			--Exception requests
+			exc_illegal_instr : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT multi is
@@ -81,6 +90,8 @@ ARCHITECTURE Structure OF unidad_control IS
 		 boot        : IN  STD_LOGIC;
 		 --Interrupts enabled
 		 inten       : IN STD_LOGIC;
+		 --div_by_zero enable;
+		 div_z_en    : IN STD_LOGIC;
 		 --Interrupt request
 		 intr        : IN STD_LOGIC;
 		 --Input signals to filter
@@ -111,7 +122,16 @@ ARCHITECTURE Structure OF unidad_control IS
 		 in_d_out    : OUT STD_LOGIC_VECTOR(2 downto 0);
 		 addr_a_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
 		 addr_d_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
-		 tkn_jmp_out : OUT STD_LOGIC_VECTOR(1 downto 0));
+		 tkn_jmp_out : OUT STD_LOGIC_VECTOR(1 downto 0);
+		 --Interrupt ID
+		 int_id      : OUT STD_LOGIC_VECTOR(3 downto 0);
+		 --Exception requests
+		 exc_illegal_instr : IN STD_LOGIC;
+		 --Unaligned access
+		 unaligned_access : IN STD_LOGIC;
+		 --LOAD or STORE
+		 ir : IN STD_LOGIC_VECTOR(15 downto 0);
+		 div_by_zero: IN STD_LOGIC);
 	END COMPONENT;
 
 	--Registers
@@ -134,6 +154,7 @@ ARCHITECTURE Structure OF unidad_control IS
 	signal c0_in_d: std_logic_vector(2 downto 0);
 	signal c0_addr_a: std_logic_vector(2 downto 0);
 	signal c0_addr_d: std_logic_vector(2 downto 0);
+	signal c0_exc_illegal_instr: std_logic;
 
 	signal c0_tkn_jmp: std_logic_vector(1 downto 0);
 
@@ -208,13 +229,15 @@ BEGIN
 		rd_in => rd_in,
 		a_sys => c0_a_sys,
 		special => c0_special,
-		inta => inta
+		inta => inta,
+		exc_illegal_instr => c0_exc_illegal_instr
 	);
 
 	m0: multi port map(
 		clk         => clk,
 		boot        => boot,
 		inten       => inten,
+		div_z_en    => div_z_en,
 		intr        => intr,
 		--Input signals
 		ldpc_in     => c0_ldpc,
@@ -241,9 +264,17 @@ BEGIN
 		special_out => special,
 		a_sys_out   => a_sys,
 		in_d_out    => in_d,
-		addr_a_out   => addr_a,
-		addr_d_out   => addr_d,
-		tkn_jmp_out  => m0_tkn_jmp
+		addr_a_out  => addr_a,
+		addr_d_out  => addr_d,
+		tkn_jmp_out => m0_tkn_jmp,
+		int_id      => int_id,
+		--Exception requests
+		exc_illegal_instr => c0_exc_illegal_instr,
+		--Unaligned access
+		unaligned_access => unaligned_access,
+		--LOAD or STORE
+		ir => ir_reg,
+		div_by_zero => div_by_zero
 	);
 
 	immed <= c0_immed;

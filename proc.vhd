@@ -15,7 +15,9 @@ ENTITY proc IS
 			wr_out    : OUT STD_LOGIC;
 			rd_in     : OUT STD_LOGIC;
 			intr      : IN STD_LOGIC;
-			inta      : OUT STD_LOGIC);
+			inta      : OUT STD_LOGIC;
+			--Unaligned access
+			unaligned_access : IN STD_LOGIC);
 END proc;
 
 ARCHITECTURE Structure OF proc IS
@@ -50,10 +52,17 @@ ARCHITECTURE Structure OF proc IS
 			special   : OUT STD_LOGIC_VECTOR(2 downto 0);
 			--Interrupts enabled
 			inten     : IN STD_LOGIC;
+			--div_by_zero enable;
+			div_z_en: IN STD_LOGIC;
 			--Interrupt request
 			intr      : IN STD_LOGIC;
 			--Interrupt ack
-			inta      : OUT STD_LOGIC);
+			inta      : OUT STD_LOGIC;
+			--Interrupt ID
+			int_id    : OUT STD_LOGIC_VECTOR(3 downto 0);
+			--Unaligned access
+			unaligned_access : IN STD_LOGIC;
+			div_by_zero: IN STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT datapath IS
@@ -82,7 +91,12 @@ ARCHITECTURE Structure OF proc IS
 				--Special operation to perform in the system regfile
 				special  : IN STD_LOGIC_VECTOR(2 downto 0);
 				--Interrupts enabled
-				inten    : OUT STD_LOGIC);
+				inten    : OUT STD_LOGIC;
+				--div_by_zero enable;
+				div_z_en: OUT STD_LOGIC;
+				--Interrupt ID
+				int_id   : IN STD_LOGIC_VECTOR(3 downto 0);
+				div_by_zero: OUT STD_LOGIC);
 	END COMPONENT;
 
 	signal uc0_op: std_logic_vector(1 downto 0);
@@ -99,10 +113,13 @@ ARCHITECTURE Structure OF proc IS
 	signal uc0_alu_immed: std_logic;
 	signal uc0_a_sys: std_logic;
 	signal uc0_special: std_logic_vector(2 downto 0);
+	signal uc0_int_id: std_logic_vector(3 downto 0);
 
 	signal dp0_alu_z: std_logic;
 	signal dp0_reg_a: std_logic_vector(15 downto 0);
 	signal dp0_inten: std_logic;
+	signal dp0_div_z_en: std_logic;
+	signal dp0_div_by_zero: std_logic;
 
 BEGIN
 
@@ -135,8 +152,12 @@ BEGIN
 		special => uc0_special,
 		inten => dp0_inten,
 		--inten => '1', --use this to test in gtkwave
+		div_z_en => dp0_div_z_en,
 		intr => intr,
-		inta => inta
+		inta => inta,
+		int_id => uc0_int_id,
+		unaligned_access => unaligned_access,
+		div_by_zero => dp0_div_by_zero
 	);
 
 	dp0: datapath port map(
@@ -162,7 +183,10 @@ BEGIN
 		rd_io => rd_io,
 		a_sys => uc0_a_sys,
 		special => uc0_special,
-		inten => dp0_inten
+		inten => dp0_inten,
+		div_z_en => dp0_div_z_en,
+		int_id => uc0_int_id,
+		div_by_zero => dp0_div_by_zero
 	);
 
 	addr_io <= uc0_immed(7 downto 0);

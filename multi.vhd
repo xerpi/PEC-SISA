@@ -2,12 +2,15 @@ library ieee;
 USE ieee.std_logic_1164.all;
 
 use work.constants.all;
+use work.opcodes.all;
 
 entity multi is
     port(clk         : IN  STD_LOGIC;
          boot        : IN  STD_LOGIC;
 	   --Interrupts enabled
 	   inten       : IN STD_LOGIC;
+	   --div_by_zero enable;
+	   div_z_en    : IN STD_LOGIC;
 	   --Interrupt request
 	   intr        : IN STD_LOGIC;
          --Input signals to filter
@@ -38,24 +41,57 @@ entity multi is
 	   in_d_out    : OUT STD_LOGIC_VECTOR(2 downto 0);
 	   addr_a_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
 	   addr_d_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
-	   tkn_jmp_out : OUT STD_LOGIC_VECTOR(1 downto 0));
+	   tkn_jmp_out : OUT STD_LOGIC_VECTOR(1 downto 0);
+		 --Interrupt ID
+		 int_id      : OUT STD_LOGIC_VECTOR(3 downto 0);
+		 --Exception requests
+		 exc_illegal_instr : IN STD_LOGIC;
+		 --Unaligned access
+		 unaligned_access : IN STD_LOGIC;
+		 --LOAD or STORE
+		 ir : IN STD_LOGIC_VECTOR(15 downto 0);
+		 div_by_zero: IN STD_LOGIC);
 end entity;
 
 architecture Structure of multi is
 	signal agregate_in_demw: std_logic_vector(5 downto 0);
 	signal agregate_in_system: std_logic_vector(5 downto 0);
+	signal agregate_in_nop: std_logic_vector(5 downto 0);
 	signal agregate_out: std_logic_vector(5 downto 0);
 
 	-- Build an enumerated type for the state machine
-	type state_type is (FETCH, DEMW, SYSTEM);
+	type state_type is (FETCH, DEMW, SYSTEM, NOP);
 
 	-- Register to hold the current state
 	signal state   : state_type;
 
-begin
+	--Unaligned address exception
+	signal exc_unaligned_access: std_logic := '0';
+	--Division by zero exception
+	signal exc_div_by_zero: std_logic := '0';
 
-	-- Aqui iria la maquina de estados del modelos de Moore que gestiona el multiciclo
-	-- Aqui irian la generacion de las senales de control que su valor depende del ciclo en que se esta.
+	--OR of all the exception requests
+	signal exc_happened: std_logic := '0';
+
+	signal opcode: std_logic_vector(3 downto 0);
+
+begin
+	opcode <= ir(15 downto 12);
+
+	--OR of all the exception requests
+	exc_happened <= exc_illegal_instr or exc_unaligned_access or exc_div_by_zero;
+
+	-- If MemCntrl. reports unaligned_access only raise execption
+	-- when dewm load/store (word).
+	exc_unaligned_access <=
+		'1' when state = DEMW and opcode = LOAD and unaligned_access = '1' else
+		'1' when state = DEMW and opcode = STORE and unaligned_access = '1' else
+		'0';
+
+	-- If Alu reports division by zero test if we are in MULT_DIV instr
+	exc_div_by_zero <=
+		'1' when opcode = MULT_DIV and div_by_zero = '1' else
+		'0';
 
 	process(clk)
 	begin
@@ -64,12 +100,34 @@ begin
 				state <= FETCH;
 			else
 				if state = FETCH then
-					state <= DEMW;
-				-- if we are in DEMW, enabled inter. and have a request
-				-- go to SYSTEM
-				elsif state = DEMW and intr = '1' and inten = '1' then
+					if unaligned_access = '1' then
+						state <= NOP;
+						int_id <= exception_unaligned_access;
+					else
+						state <= DEMW;
+					end if;
+				elsif state = DEMW then
+					if exc_happened = '1' then
+						if exc_unaligned_access = '1' then
+							state <= SYSTEM;
+							int_id <= exception_unaligned_access;
+						elsif exc_illegal_instr = '1' then
+							state <= SYSTEM;
+							int_id <= exception_illegal_instr;
+						elsif exc_div_by_zero = '1' and div_z_en = '1' then
+							state <= SYSTEM;
+							int_id <= exception_division_by_zero;
+						end if;
+
+					elsif intr = '1' and inten = '1' then
+						state <= SYSTEM;
+						int_id <= exception_interrupt;
+					else
+						state <= FETCH;
+					end if;
+				elsif state = NOP then
 					state <= SYSTEM;
-				else
+				elsif state = SYSTEM then
 					state <= FETCH;
 				end if;
 			end if;
@@ -89,11 +147,13 @@ begin
 	agregate_in_demw   <= wr_out_in & wrd_sys_in & wrd_gen_in & wr_m_in & w_b & ldpc_in;
 	-- w_b doesn't matter, force ldpc
 	agregate_in_system <=    '0'    &     '1'    &     '0'    &   '0'   & w_b & ldpc_in;
+	agregate_in_nop <= (others => '0');
 
 	with state select
 		agregate_out <=
 			agregate_in_demw when DEMW,
 			agregate_in_system when SYSTEM,
+			agregate_in_nop when NOP,
 			(others => '0') when others;
 
 	wr_out <= agregate_out(5);

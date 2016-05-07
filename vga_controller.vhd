@@ -206,4 +206,3 @@ architecture vga_controller_rtl of vga_controller is
     csync_out <= '1';
 
 end vga_controller_rtl;
-

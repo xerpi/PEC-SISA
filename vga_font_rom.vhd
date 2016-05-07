@@ -4391,4 +4391,3 @@ begin
 --   end process;
    data <= ROM(to_integer(unsigned(addr_reg)));
 end vga_font_rom_arch;
-

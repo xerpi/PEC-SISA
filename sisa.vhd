@@ -53,7 +53,9 @@ ARCHITECTURE Structure OF sisa IS
 		wr_out    : OUT STD_LOGIC;
 		rd_in     : OUT STD_LOGIC;
 		intr      : IN STD_LOGIC;
-		inta      : OUT STD_LOGIC);
+		inta      : OUT STD_LOGIC;
+		--Unaligned access
+		unaligned_access : IN STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT controladores_IO IS
@@ -104,7 +106,9 @@ ARCHITECTURE Structure OF sisa IS
 		vga_we      : out std_logic;
 		vga_wr_data : out std_logic_vector(15 downto 0);
 		vga_rd_data : in std_logic_vector(15 downto 0);
-		vga_byte_m  : out std_logic);
+		vga_byte_m  : out std_logic;
+		--Unaligned access
+		unaligned_access : out std_logic);
 	END COMPONENT;
 
 	COMPONENT vga_controller IS
@@ -144,6 +148,7 @@ ARCHITECTURE Structure OF sisa IS
 	signal mc0_vga_we      : std_logic;
 	signal mc0_vga_wr_data : std_logic_vector(15 downto 0);
 	signal mc0_vga_byte_m  : std_logic;
+	signal mc0_unaliged_access: std_logic;
 
 	signal vc0_vga_rd_data : std_logic_vector(15 downto 0);
 
@@ -185,7 +190,8 @@ BEGIN
 		rd_in => proc0_rd_in,
 		intr => io0_intr,
 		-- intr => '1',
-		inta => proc0_inta
+		inta => proc0_inta,
+		unaligned_access => mc0_unaliged_access
 	);
 
 	io0: controladores_IO port map(
@@ -233,7 +239,8 @@ BEGIN
 		vga_we => mc0_vga_we,
 		vga_wr_data => mc0_vga_wr_data,
 		vga_rd_data => vc0_vga_rd_data,
-		vga_byte_m => mc0_vga_byte_m
+		vga_byte_m => mc0_vga_byte_m,
+		unaligned_access => mc0_unaliged_access
 	);
 
 	vc0: vga_controller port map(

@@ -60,7 +60,7 @@ ARCHITECTURE Structure OF controladores_IO IS
 		keys      : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
 		read_keys : OUT STD_LOGIC_VECTOR(3 DOWNTO 0));
 	END COMPONENT;
-	
+
 	COMPONENT sw_controller IS
 	PORT (boot   : IN STD_LOGIC;
 		clk       : IN STD_LOGIC;
@@ -69,7 +69,7 @@ ARCHITECTURE Structure OF controladores_IO IS
 		switches  : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
 		rd_switch : OUT STD_LOGIC_VECTOR(7 DOWNTO 0));
 	END COMPONENT;
-	
+
 	COMPONENT timer_controller IS
 	PORT (boot   : IN STD_LOGIC;
 		clk       : IN STD_LOGIC;
@@ -106,11 +106,11 @@ ARCHITECTURE Structure OF controladores_IO IS
 	signal keys_controller0_intr: std_logic;
 	signal keys_controller0_inta: std_logic;
 	signal keys_controller0_read_keys: std_logic_vector(3 downto 0);
-	
+
 	signal sw_controller0_intr: std_logic;
 	signal sw_controller0_inta: std_logic;
 	signal sw_controller0_rd_switches: std_logic_vector(7 downto 0);
-	
+
 	signal timer_controller0_intr: std_logic;
 	signal timer_controller0_inta: std_logic;
 
@@ -166,7 +166,7 @@ BEGIN
 		keys => KEY,
 		read_keys => keys_controller0_read_keys
 	);
-	
+
 	sw_controller0: sw_controller port map(
 		boot => boot,
 		clk => CLOCK_50,
@@ -175,14 +175,14 @@ BEGIN
 		switches => SW(7 downto 0),
 		rd_switch => sw_controller0_rd_switches
 	);
-	
+
 	timer_controller0: timer_controller port map(
 		boot => boot,
 		clk => CLOCK_50,
 		inta => timer_controller0_inta,
 		intr => timer_controller0_intr
 	);
-	
+
 
 	intctrl0: interrupt_controller port map(
 		boot => boot,

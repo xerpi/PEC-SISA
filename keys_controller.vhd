@@ -22,7 +22,7 @@ BEGIN
 			if intr_pending = '1' and inta = '1' then
 				intr_pending <= '0';
 			end if;
-			
+
 			if keys /= keys_buffer and intr_pending = '0' then
 				intr_pending <= '1';
 				keys_buffer <= keys;
@@ -32,5 +32,5 @@ BEGIN
 
 	read_keys <= keys_buffer;
 	intr <= intr_pending;
-	
+
 END Structure;

@@ -28,9 +28,9 @@ BEGIN
 				B"0000110" when "1110",
 				B"0001110" when "1111",
 				B"0111111" when others;
-				
+
 		with enable select
 			bitsCaracter <=
 				bits when '1',
 				(others => '1') when others;
-END Structure; 
+END Structure;

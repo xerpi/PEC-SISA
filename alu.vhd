@@ -8,7 +8,8 @@ ENTITY alu IS
           op   : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
           func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
           w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-          z    : OUT STD_LOGIC);
+          z    : OUT STD_LOGIC;
+			 div_by_zero: OUT STD_LOGIC);
 END alu;
 
 ARCHITECTURE Structure OF alu IS
@@ -37,7 +38,8 @@ ARCHITECTURE Structure OF alu IS
 		 PORT (x    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 				 y    : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 				 func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-				 w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
+				 w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+				 div_by_zero: OUT STD_LOGIC);
 	END COMPONENT;
 
 	signal misc0_w: std_logic_vector(15 downto 0);
@@ -73,7 +75,8 @@ BEGIN
 		x    => x,
 		y    => y,
 		func => func,
-		w    => muldiv0_w
+		w    => muldiv0_w,
+		div_by_zero => div_by_zero
 	);
 
 	with op select

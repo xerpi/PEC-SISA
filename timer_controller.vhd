@@ -33,12 +33,12 @@ BEGIN
 		if rising_edge(clock_20hz_signal) then
 			intr_pending <= '1';
 		end if;
-		
+
 		if intr_pending = '1' and inta = '1' then
 				intr_pending <= '0';
 		end if;
 	end process;
 
 	intr <= intr_pending;
-	
+
 END Structure;

@@ -43,7 +43,7 @@ BEGIN
 	ps2_inta    <= inta_aggregate(3);
 
 	intr <= key_intr or ps2_intr or switch_intr or timer_intr;
-	iid <= 
+	iid <=
 		X"00" when iid_buffer = X"1" else
 		X"01" when iid_buffer = X"2" else
 		X"02" when iid_buffer = X"4" else

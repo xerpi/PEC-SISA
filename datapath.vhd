@@ -31,7 +31,12 @@ ENTITY datapath IS
 			--Special operation to perform in the system regfile
 			special  : IN STD_LOGIC_VECTOR(2 downto 0);
 			--Interrupts enabled
-			inten   : OUT STD_LOGIC);
+			inten   : OUT STD_LOGIC;
+			--div_by_zero enable;
+			div_z_en: OUT STD_LOGIC;
+			--Interrupt ID
+			int_id  : IN STD_LOGIC_VECTOR(3 downto 0);
+			div_by_zero: OUT STD_LOGIC);
 END datapath;
 
 ARCHITECTURE Structure OF datapath IS
@@ -49,7 +54,13 @@ ARCHITECTURE Structure OF datapath IS
 		  a_sys   : IN  STD_LOGIC;
 		  special : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 		  --Interrupts enabled
-		  inten   : OUT STD_LOGIC);
+		  inten   : OUT STD_LOGIC;
+		  --div_by_zero enable;
+		  div_z_en: OUT STD_LOGIC;
+		  --Interrupt ID
+		  int_id  : IN STD_LOGIC_VECTOR(3 downto 0);
+		  --Address to memory. Needed when exception_unaligned_access
+		  addr_mem    : IN STD_LOGIC_VECTOR(15 downto 0));
 	END COMPONENT;
 
 	COMPONENT alu IS
@@ -59,7 +70,8 @@ ARCHITECTURE Structure OF datapath IS
                   op   : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
                   func : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
                   w    : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-                  z    : OUT STD_LOGIC);
+                  z    : OUT STD_LOGIC;
+						div_by_zero: OUT STD_LOGIC);
 	END COMPONENT;
 
 	signal alu0_w: std_logic_vector(15 downto 0);
@@ -106,7 +118,10 @@ BEGIN
 		b       => regfiles0_b,
 		a_sys   => a_sys,
 		special => special,
-		inten   => inten
+		inten   => inten,
+		div_z_en => div_z_en,
+		int_id  => int_id,
+		addr_mem => alu0_w
 	);
 
 	alu0: alu port map(
@@ -115,7 +130,8 @@ BEGIN
 		op   => op,
 		func => func,
 		w    => alu0_w,
-		z    => alu_z
+		z    => alu_z,
+		div_by_zero => div_by_zero
 	);
 
 	reg_a <= regfiles0_a;
