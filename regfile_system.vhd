@@ -14,18 +14,29 @@ ENTITY regfile_system IS
           special : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
           --Interrupts enabled
           inten   : OUT STD_LOGIC;
-	    --div_by_zero enable;
-	    div_z_en: OUT STD_LOGIC;
+          --System mode (user or kernel)
+          system_mode    : OUT STD_LOGIC;
           --Interrupt ID
           int_id  : IN STD_LOGIC_VECTOR(3 downto 0);
           --Address to memory. Needed when exception_unaligned_access
-          addr_mem: IN STD_LOGIC_VECTOR(15 downto 0));
+          addr_mem: IN STD_LOGIC_VECTOR(15 downto 0);
+			 reload_addr_mem : IN STD_LOGIC);
 END regfile_system;
 
 ARCHITECTURE Structure OF regfile_system IS
 	type REGISTERS_T is array (7 downto 0) of std_logic_vector(15 downto 0);
 	--signal registers: REGISTERS_T := (others => X"C000"); use this to do a loop in gtkwave
-	signal registers: REGISTERS_T := (others => (others => '0'));
+	signal registers: REGISTERS_T := (
+		--Start the CPU in kernel mode
+		(15 downto 1 => '0') & system_mode_kernel,
+		(others => '0'),
+		(others => '0'),
+		(others => '0'),
+		(others => '0'),
+		(others => '0'),
+		(others => '0'),
+		(others => '0')
+	);
 
 	-- Needed to store previous cycle alu output
 	signal addr_mem_reg: std_logic_vector(15 downto 0);
@@ -33,7 +44,9 @@ BEGIN
 	process(clk)
 	begin
 		if rising_edge(clk) then
-			addr_mem_reg <= addr_mem;
+			if reload_addr_mem = '1' then
+				addr_mem_reg <= addr_mem;
+			end if;
 
 			if wrd = '1' then
 				registers(to_integer(unsigned(addr_d))) <= d;
@@ -52,8 +65,8 @@ BEGIN
 				registers(0) <= registers(7); --restore status (S0 <- S7)
 				registers(1) <= d;            --S1 <- PCup
 				registers(2) <= (15 downto 4 => '0') & int_id;
-				--registers(2) <= X"000F";      --event is an interrupt (S2 <- 0x000F)
 				registers(3) <= addr_mem_reg;
+				registers(7)(0) <= system_mode_kernel; --enter kernel mode
 				registers(7)(1) <= '0';       --disable interrupts (S7<1> <- 0)
 			end if;
 		end if;
@@ -61,5 +74,5 @@ BEGIN
 
 	a <= registers(to_integer(unsigned(addr_a)));
 	inten <= registers(7)(1);
-	div_z_en <= registers(7)(2);
+	system_mode <= registers(7)(0);
 END Structure;

@@ -12,7 +12,9 @@ ENTITY control_l_io IS
 	wrd_gen_in     : IN STD_LOGIC;
 	wrd_gen_out    : OUT STD_LOGIC;
 	wr_out     : OUT STD_LOGIC;
-	rd_in      : OUT STD_LOGIC);
+	rd_in      : OUT STD_LOGIC;
+		  	--Protected I/O instruction
+			protected_io_instr: OUT STD_LOGIC);
 END control_l_io;
 
 ARCHITECTURE Structure OF control_l_io IS
@@ -35,4 +37,8 @@ BEGIN
 
 	rd_in <= '0'; --PDF: "indica si estamos leyendo un puerto (... que por ahora no implementaremos)"
 
+	protected_io_instr <=
+		'1' when ir(15 downto 12) = IN_OUT else
+		'0';
+	
 END Structure;

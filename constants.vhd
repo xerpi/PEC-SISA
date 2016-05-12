@@ -67,6 +67,12 @@ package constants is
 	constant exception_illegal_instr    : std_logic_vector(3 downto 0) := X"0";
 	constant exception_unaligned_access : std_logic_vector(3 downto 0) := X"1";
 	constant exception_division_by_zero : std_logic_vector(3 downto 0) := X"4";
+	constant exception_protected_instr  : std_logic_vector(3 downto 0) := X"D";
+	constant exception_calls            : std_logic_vector(3 downto 0) := X"E";
 	constant exception_interrupt        : std_logic_vector(3 downto 0) := X"F";
-
+	
+	--System mode
+	constant system_mode_user   : std_logic := '0';
+	constant system_mode_kernel : std_logic := '1';
+	
 end constants;

@@ -76,18 +76,18 @@ begin
 		we;
 
 	vga_we <=
-		'1' when addr >= X"A000" and addr < X"C000" and we = '1' else --VGA RAM
+		'1' when (addr >= X"A000") and (addr < X"C000") and (we = '1') else --VGA RAM
 		'0';
 
 	rd_data <=
-		vga_rd_data when addr >= X"A000" and addr < X"C000" else --VGA RAM
+		vga_rd_data when (addr >= X"A000") and (addr < X"C000") else --VGA RAM
 		sc0_dataReaded;
 
 	vga_addr <= addr(12 downto 0);
 	vga_wr_data <= wr_data;
 	vga_byte_m <= byte_m;
 
-	unaligned_access <= addr(0) and not byte_m;
+	unaligned_access <= addr(0) and (not byte_m);
 
 	--with addr >= X"C000" select
 	--	we_sram <= '0' when true,

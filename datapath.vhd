@@ -32,11 +32,12 @@ ENTITY datapath IS
 			special  : IN STD_LOGIC_VECTOR(2 downto 0);
 			--Interrupts enabled
 			inten   : OUT STD_LOGIC;
-			--div_by_zero enable;
-			div_z_en: OUT STD_LOGIC;
+			--System mode (user or kernel)
+			system_mode    : OUT STD_LOGIC;
 			--Interrupt ID
 			int_id  : IN STD_LOGIC_VECTOR(3 downto 0);
-			div_by_zero: OUT STD_LOGIC);
+			div_by_zero: OUT STD_LOGIC;
+			reload_addr_mem : IN STD_LOGIC);
 END datapath;
 
 ARCHITECTURE Structure OF datapath IS
@@ -55,12 +56,13 @@ ARCHITECTURE Structure OF datapath IS
 		  special : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 		  --Interrupts enabled
 		  inten   : OUT STD_LOGIC;
-		  --div_by_zero enable;
-		  div_z_en: OUT STD_LOGIC;
+		  --System mode (user or kernel)
+		  system_mode    : OUT STD_LOGIC;
 		  --Interrupt ID
 		  int_id  : IN STD_LOGIC_VECTOR(3 downto 0);
 		  --Address to memory. Needed when exception_unaligned_access
-		  addr_mem    : IN STD_LOGIC_VECTOR(15 downto 0));
+		  addr_mem    : IN STD_LOGIC_VECTOR(15 downto 0);
+		  reload_addr_mem : IN STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT alu IS
@@ -119,9 +121,10 @@ BEGIN
 		a_sys   => a_sys,
 		special => special,
 		inten   => inten,
-		div_z_en => div_z_en,
+		system_mode => system_mode,
 		int_id  => int_id,
-		addr_mem => alu0_w
+		addr_mem => alu0_w,
+		reload_addr_mem => reload_addr_mem
 	);
 
 	alu0: alu port map(

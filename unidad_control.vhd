@@ -32,8 +32,8 @@ ENTITY unidad_control IS
 		--Special operation to perform in the system regfile
 		special   : OUT STD_LOGIC_VECTOR(2 downto 0);
 		inten     : IN STD_LOGIC;
-		--div_by_zero enable;
-		div_z_en  : IN STD_LOGIC;
+		--System mode (user or kernel)
+		system_mode    : IN STD_LOGIC;
 		--Interrupt request
 		intr      : IN STD_LOGIC;
 		--Interrupt ack
@@ -42,7 +42,8 @@ ENTITY unidad_control IS
 		int_id    : OUT STD_LOGIC_VECTOR(3 downto 0);
 		--Unaligned access
 		unaligned_access : IN STD_LOGIC;
-		div_by_zero: IN STD_LOGIC);
+		div_by_zero: IN STD_LOGIC;
+		reload_addr_mem : OUT STD_LOGIC);
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -82,7 +83,10 @@ ARCHITECTURE Structure OF unidad_control IS
 			--Interrupt ack
 			inta      : OUT STD_LOGIC;
 			--Exception requests
-			exc_illegal_instr : OUT STD_LOGIC);
+			exc_illegal_instr : OUT STD_LOGIC;
+			--Protected instruction
+			protected_instr: OUT STD_LOGIC;
+			calls_instr : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT multi is
@@ -90,8 +94,8 @@ ARCHITECTURE Structure OF unidad_control IS
 		 boot        : IN  STD_LOGIC;
 		 --Interrupts enabled
 		 inten       : IN STD_LOGIC;
-		 --div_by_zero enable;
-		 div_z_en    : IN STD_LOGIC;
+		 --System mode (user or kernel)
+		 system_mode    : IN STD_LOGIC;
 		 --Interrupt request
 		 intr        : IN STD_LOGIC;
 		 --Input signals to filter
@@ -131,7 +135,11 @@ ARCHITECTURE Structure OF unidad_control IS
 		 unaligned_access : IN STD_LOGIC;
 		 --LOAD or STORE
 		 ir : IN STD_LOGIC_VECTOR(15 downto 0);
-		 div_by_zero: IN STD_LOGIC);
+		 div_by_zero: IN STD_LOGIC;
+		 reload_addr_mem : OUT STD_LOGIC;
+		 --Protected instruction
+		 protected_instr: IN STD_LOGIC;
+		 calls_instr : IN STD_LOGIC);
 	END COMPONENT;
 
 	--Registers
@@ -155,6 +163,8 @@ ARCHITECTURE Structure OF unidad_control IS
 	signal c0_addr_a: std_logic_vector(2 downto 0);
 	signal c0_addr_d: std_logic_vector(2 downto 0);
 	signal c0_exc_illegal_instr: std_logic;
+	signal c0_protected_instr: std_logic;
+	signal c0_calls_instr: std_logic;
 
 	signal c0_tkn_jmp: std_logic_vector(1 downto 0);
 
@@ -230,14 +240,16 @@ BEGIN
 		a_sys => c0_a_sys,
 		special => c0_special,
 		inta => inta,
-		exc_illegal_instr => c0_exc_illegal_instr
+		exc_illegal_instr => c0_exc_illegal_instr,
+		protected_instr => c0_protected_instr,
+		calls_instr => c0_calls_instr
 	);
 
 	m0: multi port map(
 		clk         => clk,
 		boot        => boot,
 		inten       => inten,
-		div_z_en    => div_z_en,
+	   system_mode => system_mode,
 		intr        => intr,
 		--Input signals
 		ldpc_in     => c0_ldpc,
@@ -274,7 +286,10 @@ BEGIN
 		unaligned_access => unaligned_access,
 		--LOAD or STORE
 		ir => ir_reg,
-		div_by_zero => div_by_zero
+		div_by_zero => div_by_zero,
+		reload_addr_mem => reload_addr_mem,
+		protected_instr => c0_protected_instr,
+		calls_instr => c0_calls_instr
 	);
 
 	immed <= c0_immed;

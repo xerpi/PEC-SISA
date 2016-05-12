@@ -9,8 +9,8 @@ entity multi is
          boot        : IN  STD_LOGIC;
 	   --Interrupts enabled
 	   inten       : IN STD_LOGIC;
-	   --div_by_zero enable;
-	   div_z_en    : IN STD_LOGIC;
+	   --System mode (user or kernel)
+	   system_mode    : IN STD_LOGIC;
 	   --Interrupt request
 	   intr        : IN STD_LOGIC;
          --Input signals to filter
@@ -50,7 +50,11 @@ entity multi is
 		 unaligned_access : IN STD_LOGIC;
 		 --LOAD or STORE
 		 ir : IN STD_LOGIC_VECTOR(15 downto 0);
-		 div_by_zero: IN STD_LOGIC);
+		 div_by_zero: IN STD_LOGIC;
+		 reload_addr_mem : OUT STD_LOGIC;
+		 --Protected instruction
+		 protected_instr: IN STD_LOGIC;
+		 calls_instr : IN STD_LOGIC);
 end entity;
 
 architecture Structure of multi is
@@ -69,6 +73,10 @@ architecture Structure of multi is
 	signal exc_unaligned_access: std_logic := '0';
 	--Division by zero exception
 	signal exc_div_by_zero: std_logic := '0';
+	--Protected instr
+	signal exc_protected_instr: std_logic := '0';
+	--Illegal CALLS (CALLS in system mode)
+	signal illegal_calls: std_logic := '0';
 
 	--OR of all the exception requests
 	signal exc_happened: std_logic := '0';
@@ -79,18 +87,32 @@ begin
 	opcode <= ir(15 downto 12);
 
 	--OR of all the exception requests
-	exc_happened <= exc_illegal_instr or exc_unaligned_access or exc_div_by_zero;
-
+	exc_happened <=
+		'1' when exc_illegal_instr = '1' else
+		'1' when exc_unaligned_access = '1' else
+		'1' when exc_div_by_zero = '1' else
+		'1' when exc_protected_instr = '1' else
+		'1' when illegal_calls = '1' else
+		'0';
+	--exc_happened <= '0';
 	-- If MemCntrl. reports unaligned_access only raise execption
 	-- when dewm load/store (word).
 	exc_unaligned_access <=
-		'1' when state = DEMW and opcode = LOAD and unaligned_access = '1' else
-		'1' when state = DEMW and opcode = STORE and unaligned_access = '1' else
+		'1' when (state = DEMW) and (opcode = LOAD) and (unaligned_access = '1') else
+		'1' when (state = DEMW) and (opcode = STORE) and (unaligned_access = '1') else
 		'0';
+		
+	exc_protected_instr <=
+		'1' when protected_instr = '1' and system_mode = system_mode_user else
+		'0';
+		
+	illegal_calls <=
+		'1' when calls_instr = '1' and system_mode = system_mode_kernel else
+		'0';		
 
 	-- If Alu reports division by zero test if we are in MULT_DIV instr
 	exc_div_by_zero <=
-		'1' when opcode = MULT_DIV and div_by_zero = '1' else
+		'1' when (state = DEMW) and (opcode = MULT_DIV) and (div_by_zero = '1') else
 		'0';
 
 	process(clk)
@@ -111,15 +133,20 @@ begin
 						if exc_unaligned_access = '1' then
 							state <= SYSTEM;
 							int_id <= exception_unaligned_access;
-						elsif exc_illegal_instr = '1' then
+						elsif (exc_illegal_instr = '1') or (illegal_calls = '1') then
 							state <= SYSTEM;
 							int_id <= exception_illegal_instr;
-						elsif exc_div_by_zero = '1' and div_z_en = '1' then
+						elsif exc_div_by_zero = '1' then
 							state <= SYSTEM;
 							int_id <= exception_division_by_zero;
+						elsif exc_protected_instr = '1' then
+							state <= SYSTEM;
+							int_id <= exception_protected_instr;				
 						end if;
-
-					elsif intr = '1' and inten = '1' then
+					elsif (calls_instr = '1') and (system_mode = system_mode_user) then
+							state <= SYSTEM;
+							int_id <= exception_calls;							
+					elsif (intr = '1') and (inten = '1') then
 						state <= SYSTEM;
 						int_id <= exception_interrupt;
 					else
@@ -149,12 +176,13 @@ begin
 	agregate_in_system <=    '0'    &     '1'    &     '0'    &   '0'   & w_b & ldpc_in;
 	agregate_in_nop <= (others => '0');
 
-	with state select
-		agregate_out <=
-			agregate_in_demw when DEMW,
-			agregate_in_system when SYSTEM,
-			agregate_in_nop when NOP,
-			(others => '0') when others;
+	agregate_out <=
+			--Avoid doing garbage operations
+			agregate_in_nop when state = DEMW and exc_happened = '1' else
+			agregate_in_demw when state = DEMW else
+			agregate_in_system when state = SYSTEM else
+			agregate_in_nop when state = NOP else
+			(others => '0');
 
 	wr_out <= agregate_out(5);
 	wrd_sys_out <= agregate_out(4);
@@ -194,5 +222,11 @@ begin
 			special_start_int when SYSTEM,
 			special_none when others;
 
-
+	--Save unaligned access effective address (Unaligned FETCH vs Unaligned LD/ST DEMW)
+	with state select
+		reload_addr_mem <=
+			'1' when FETCH,
+			'1' when DEMW,
+			'0' when others;
+			
 end Structure;

@@ -23,7 +23,9 @@ ENTITY control_l_special IS
 		  in_d_in         : IN STD_LOGIC_VECTOR(2 downto 0);
 		  in_d_out        : OUT STD_LOGIC_VECTOR(2 downto 0);
 			--Interrupt ack
-			inta      : OUT STD_LOGIC);
+			inta      : OUT STD_LOGIC;
+			--Protected special instruction
+			protected_special_instr: OUT STD_LOGIC);
 END control_l_special;
 
 ARCHITECTURE Structure OF control_l_special IS
@@ -85,5 +87,15 @@ BEGIN
 		special_reti when func = F_RETI and opcode = SPECIAL else
 		special_none;
 
-
+	protected_special_instr <=
+		'1' when func = F_RDS and opcode = SPECIAL else
+		'1' when func = F_WRS and opcode = SPECIAL else
+		'1' when func = F_EI and opcode = SPECIAL else
+		'1' when func = F_DI and opcode = SPECIAL else
+		'1' when func = F_RETI and opcode = SPECIAL else
+		'1' when func = F_GETIID and opcode = SPECIAL else
+		'0';
+		
+		
+		
 END Structure;

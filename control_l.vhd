@@ -36,7 +36,10 @@ ENTITY control_l IS
 		--Interrupt ack
 		inta      : OUT STD_LOGIC;
 		--Exception requests
-		exc_illegal_instr : OUT STD_LOGIC);
+		exc_illegal_instr : OUT STD_LOGIC;
+		--Protected instruction
+		protected_instr: OUT STD_LOGIC;
+		calls_instr : OUT STD_LOGIC);
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
@@ -63,6 +66,7 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_io_wrd_gen      : std_logic;
 	signal c0_io_wr_out       : std_logic;
 	signal c0_io_rd_in        : std_logic;
+	signal c0_io_protected_io_instr : std_logic;
 
 	signal c0_special_ldpc    : std_logic;
 	signal c0_special_wrd_sys : std_logic;
@@ -71,6 +75,7 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_special_abs_jmp_tkn : std_logic;
 	signal c0_special_wrd_gen : std_logic;
 	signal c0_special_in_d    : std_logic_vector(2 downto 0);
+	signal c0_special_protected_special_instr : std_logic;
 
 	signal opcode             : std_logic_vector(3 downto 0);
 
@@ -104,7 +109,8 @@ ARCHITECTURE Structure OF control_l IS
 			wrd_gen_in     : IN STD_LOGIC;
 			wrd_gen_out    : OUT STD_LOGIC;
 			rel_jmp_tkn: OUT STD_LOGIC;
-			abs_jmp_tkn: OUT STD_LOGIC);
+			abs_jmp_tkn: OUT STD_LOGIC;
+			calls_instr : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT control_l_io IS
@@ -112,7 +118,9 @@ ARCHITECTURE Structure OF control_l IS
 		  wrd_gen_in     : IN STD_LOGIC;
 		  wrd_gen_out    : OUT STD_LOGIC;
 		  wr_out     : OUT STD_LOGIC;
-		  rd_in      : OUT STD_LOGIC);
+		  rd_in      : OUT STD_LOGIC;
+		  	--Protected I/O instruction
+			protected_io_instr: OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT control_l_special IS
@@ -131,7 +139,9 @@ ARCHITECTURE Structure OF control_l IS
 		  in_d_in         : IN STD_LOGIC_VECTOR(2 downto 0);
 		  in_d_out        : OUT STD_LOGIC_VECTOR(2 downto 0);
 		   --Interrupt ack
-		   inta      : OUT STD_LOGIC);
+		   inta      : OUT STD_LOGIC;
+			--Protected special instruction
+			protected_special_instr: OUT STD_LOGIC);
 	END COMPONENT;
 
 
@@ -167,7 +177,8 @@ BEGIN
 		alu_z => alu_z,
 		wrd_gen_out => c0_jmp_wrd_gen,
 		rel_jmp_tkn => c0_jmp_rel_jmp_tkn,
-		abs_jmp_tkn => c0_jmp_abs_jmp_tkn
+		abs_jmp_tkn => c0_jmp_abs_jmp_tkn,
+		calls_instr => calls_instr
 	);
 
 	c0_io: control_l_io port map(
@@ -175,7 +186,8 @@ BEGIN
 		wrd_gen_in => c0_jmp_wrd_gen,
 		wrd_gen_out => c0_io_wrd_gen,
 		wr_out => c0_io_wr_out,
-		rd_in => c0_io_rd_in
+		rd_in => c0_io_rd_in,
+		protected_io_instr => c0_io_protected_io_instr
 	);
 
 	c0_special: control_l_special port map(
@@ -193,7 +205,8 @@ BEGIN
 		a_sys => a_sys,
 		in_d_in => c0_g_in_d,
 		in_d_out => c0_special_in_d,
-		inta => inta
+		inta => inta,
+		protected_special_instr => c0_special_protected_special_instr
 	);
 
 	op <= c0_g_op;
@@ -219,5 +232,10 @@ BEGIN
 
 	wr_out <= c0_io_wr_out;
 	rd_in <= c0_io_rd_in;
+	
+	protected_instr <=
+		'1' when c0_special_protected_special_instr = '1' else
+		--'1' when c0_io_protected_io_instr = '1' else
+		'0';
 
 END Structure;

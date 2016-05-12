@@ -16,12 +16,13 @@ ENTITY regfiles IS
           special : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
           --Interrupts enabled
           inten   : OUT STD_LOGIC;
-	    --div_by_zero enable;
-	    div_z_en: OUT STD_LOGIC;
+          --System mode (user or kernel)
+          system_mode    : OUT STD_LOGIC;
           --Interrupt ID
           int_id  : IN STD_LOGIC_VECTOR(3 downto 0);
           --Address to memory. Needed when exception_unaligned_access
-          addr_mem    : IN STD_LOGIC_VECTOR(15 downto 0));
+          addr_mem    : IN STD_LOGIC_VECTOR(15 downto 0);
+			 reload_addr_mem : IN STD_LOGIC);
 END regfiles;
 
 ARCHITECTURE Structure OF regfiles IS
@@ -47,12 +48,13 @@ ARCHITECTURE Structure OF regfiles IS
 		  special : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 		  --Interrupts enabled
 		  inten   : OUT STD_LOGIC;
-		  --div_by_zero enable;
-		  div_z_en: OUT STD_LOGIC;
+		  --System mode (user or kernel)
+		  system_mode    : OUT STD_LOGIC;
 		  --Interrupt ID
 		  int_id  : IN STD_LOGIC_VECTOR(3 downto 0);
 		  --Address to memory. Needed when exception_unaligned_access
-		  addr_mem    : IN STD_LOGIC_VECTOR(15 downto 0));
+		  addr_mem    : IN STD_LOGIC_VECTOR(15 downto 0);
+		  reload_addr_mem : IN STD_LOGIC);
 	END COMPONENT;
 
 	signal reg_general0_a : std_logic_vector(15 downto 0);
@@ -80,9 +82,10 @@ BEGIN
 		a       => reg_system0_a,
 		special => special,
 		inten   => inten,
-		div_z_en => div_z_en,
+		system_mode => system_mode,
 		int_id  => int_id,
-		addr_mem => addr_mem
+		addr_mem => addr_mem,
+		reload_addr_mem => reload_addr_mem
 	);
 
 	with a_sys select

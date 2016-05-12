@@ -51,8 +51,8 @@ BEGIN
 	div_u <= std_logic_vector(unsigned(x) / unsigned(dividend));
 
 	div_by_zero <=
-		'1' when func = F_DIV and unsigned(y) = 0 else
-		'1' when func = F_DIVU and unsigned(y) = 0 else
+		'1' when (func = F_DIV) and (unsigned(y) = 0) else
+		'1' when (func = F_DIVU) and (unsigned(y) = 0) else
 		'0';
 
 	with func select
