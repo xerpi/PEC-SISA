@@ -123,7 +123,7 @@ BEGIN
 		inten   => inten,
 		system_mode => system_mode,
 		int_id  => int_id,
-		addr_mem => alu0_w,
+		addr_mem => addr_m_out,
 		reload_addr_mem => reload_addr_mem
 	);
 

@@ -101,14 +101,14 @@ begin
 		'1' when (state = DEMW) and (opcode = LOAD) and (unaligned_access = '1') else
 		'1' when (state = DEMW) and (opcode = STORE) and (unaligned_access = '1') else
 		'0';
-		
+
 	exc_protected_instr <=
 		'1' when protected_instr = '1' and system_mode = system_mode_user else
 		'0';
-		
+
 	illegal_calls <=
 		'1' when calls_instr = '1' and system_mode = system_mode_kernel else
-		'0';		
+		'0';
 
 	-- If Alu reports division by zero test if we are in MULT_DIV instr
 	exc_div_by_zero <=
@@ -141,11 +141,11 @@ begin
 							int_id <= exception_division_by_zero;
 						elsif exc_protected_instr = '1' then
 							state <= SYSTEM;
-							int_id <= exception_protected_instr;				
+							int_id <= exception_protected_instr;
 						end if;
 					elsif (calls_instr = '1') and (system_mode = system_mode_user) then
 							state <= SYSTEM;
-							int_id <= exception_calls;							
+							int_id <= exception_calls;
 					elsif (intr = '1') and (inten = '1') then
 						state <= SYSTEM;
 						int_id <= exception_interrupt;
@@ -174,7 +174,7 @@ begin
 	agregate_in_demw   <= wr_out_in & wrd_sys_in & wrd_gen_in & wr_m_in & w_b & ldpc_in;
 	-- w_b doesn't matter, force ldpc
 	agregate_in_system <=    '0'    &     '1'    &     '0'    &   '0'   & w_b & ldpc_in;
-	agregate_in_nop <= (others => '0');
+	agregate_in_nop <=    '0'    &     '0'    &     '0'    &   '0'   & '0' & ldpc_in;
 
 	agregate_out <=
 			--Avoid doing garbage operations
@@ -228,5 +228,5 @@ begin
 			'1' when FETCH,
 			'1' when DEMW,
 			'0' when others;
-			
+
 end Structure;
