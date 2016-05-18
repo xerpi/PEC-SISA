@@ -21,16 +21,14 @@ END TLB;
 
 ARCHITECTURE Structure OF TLB IS
 
-	function log2(v : std_logic_vector) return unsigned is
-		variable result : unsigned(2 downto 0);
+	function log2(v : std_logic_vector) return integer is
 	begin
-		result := (others => '0');
 		for i in v'high downto v'low loop
 			if v(i) = '1' then
-				exit;
+				return i;
 			end if;
 		end loop;
-		return result;
+		return 0;
 	end;
 
 	type TLB_entry is record
@@ -55,14 +53,31 @@ ARCHITECTURE Structure OF TLB IS
 	signal match_entry : integer range 0 to 7;
 BEGIN
 
-	process(clk, boot)
 
+	process(clk, boot)
 	begin
 		if boot = '1' then
-			for i in entries'range loop
+			--Setup user pages(0x0000 to 0x2FFF)
+			for i in 0 to 2 loop
 				entries(i) <= (
 					vpn => std_logic_vector(to_unsigned(i, entries(i).vpn'length)),
 					pfn => std_logic_vector(to_unsigned(i, entries(i).pfn'length)),
+					v   => TLB_entry_status_valid,
+					r   => TLB_entry_access_ro
+				);
+			end loop;
+			--Setup kernel pages(0x8000 to 0x8FFF)
+			entries(3) <= (
+				vpn => X"8",
+				pfn => X"8",
+				v   => TLB_entry_status_valid,
+				r   => TLB_entry_access_ro
+			);
+			--Setup kernel pages(0xC000 to 0xFFFF)
+			for i in 0 to 3 loop
+				entries(i + 4) <= (
+					vpn => std_logic_vector(to_unsigned(i + 16#C#, entries(i).vpn'length)),
+					pfn => std_logic_vector(to_unsigned(i + 16#C#, entries(i).pfn'length)),
 					v   => TLB_entry_status_valid,
 					r   => TLB_entry_access_ro
 				);
@@ -92,7 +107,7 @@ BEGIN
 
 	first_match <= match and std_logic_vector(unsigned(not(match)) + 1);
 
-	match_entry <= to_integer(log2(first_match));
+	match_entry <= log2(first_match);
 
 	pfn <= entries(match_entry).pfn;
 	v <= entries(match_entry).v;
