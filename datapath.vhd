@@ -104,6 +104,9 @@ ARCHITECTURE Structure OF datapath IS
 	signal regfiles0_a: std_logic_vector(15 downto 0);
 	signal regfiles0_b: std_logic_vector(15 downto 0);
 
+	signal ITLB0_pfn: std_logic_vector(3 downto 0);
+	signal DTLB0_pfn: std_logic_vector(3 downto 0);
+
 BEGIN
 
 	with in_d select
@@ -115,42 +118,42 @@ BEGIN
 			pc when in_d_cur_pc,
 			(others => '0') when others;
 
+	ITLB0: TLB port map(
+		boot  => boot,
+		clk   => clk,
+		vpn   => pc(15 downto 12),
+		pfn   => ITLB0_pfn,
+		v     => open,
+		r     => open,
+		miss  => open,
+		wr    => '0',
+		phys  => '0',
+		index => (others => '0'),
+		entry => (others => '0'),
+		flush => '0'
+
+	);
+
+	DTLB0: TLB port map(
+		boot  => boot,
+		clk   => clk,
+		vpn   => alu0_w(15 downto 12),
+		pfn   => DTLB0_pfn,
+		v     => open,
+		r     => open,
+		miss  => open,
+		wr    => '0',
+		phys  => '0',
+		index => (others => '0'),
+		entry => (others => '0'),
+		flush => '0'
+	);
+
 	with ins_dad select
 		addr_m_out <=
-			alu0_w when '1',
-			pc when '0',
+			DTLB0_pfn & alu0_w(11 downto 0) when '1',
+			ITLB0_pfn & pc(11 downto 0) when '0',
 			(others => '0') when others;
-
-	ITLB: TLB port map(
-		boot  => boot,
-		clk   => clk,
-		vpn   => (others => '0'),
-		pfn   => open,
-		v     => open,
-		r     => open,
-		miss  => open,
-		wr    => '0',
-		phys  => '0',
-		index => (others => '0'),
-		entry => (others => '0'),
-		flush => '0'
-
-	);
-
-	DTLB: TLB port map(
-		boot  => boot,
-		clk   => clk,
-		vpn   => (others => '0'),
-		pfn   => open,
-		v     => open,
-		r     => open,
-		miss  => open,
-		wr    => '0',
-		phys  => '0',
-		index => (others => '0'),
-		entry => (others => '0'),
-		flush => '0'
-	);
 
 	with alu_immed select
 		alu_y_in <=
