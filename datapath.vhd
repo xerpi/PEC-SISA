@@ -78,6 +78,23 @@ ARCHITECTURE Structure OF datapath IS
 						div_by_zero: OUT STD_LOGIC);
 	END COMPONENT;
 
+	COMPONENT TLB IS
+		PORT (
+			boot  : IN  STD_LOGIC;
+			clk   : IN  STD_LOGIC;
+			vpn   : IN  STD_LOGIC_VECTOR(3 downto 0);
+			pfn   : OUT STD_LOGIC_VECTOR(3 downto 0);
+			v     : OUT STD_LOGIC;
+			r     : OUT STD_LOGIC;
+			miss  : OUT STD_LOGIC;
+			wr    : IN  STD_LOGIC;
+			phys  : IN  STD_LOGIC;
+			index : IN  STD_LOGIC_VECTOR(2 downto 0);
+			entry : IN  STD_LOGIC_VECTOR(5 downto 0);
+			flush : IN  STD_LOGIC
+		);
+	END COMPONENT;
+
 	signal alu0_w: std_logic_vector(15 downto 0);
 
 	signal reg_d_in: std_logic_vector(15 downto 0);
@@ -104,6 +121,36 @@ BEGIN
 			pc when '0',
 			(others => '0') when others;
 
+	ITLB: TLB port map(
+		boot  => boot,
+		clk   => clk,
+		vpn   => (others => '0'),
+		pfn   => open,
+		v     => open,
+		r     => open,
+		miss  => open,
+		wr    => '0',
+		phys  => '0',
+		index => (others => '0'),
+		entry => (others => '0'),
+		flush => '0'
+
+	);
+
+	DTLB: TLB port map(
+		boot  => boot,
+		clk   => clk,
+		vpn   => (others => '0'),
+		pfn   => open,
+		v     => open,
+		r     => open,
+		miss  => open,
+		wr    => '0',
+		phys  => '0',
+		index => (others => '0'),
+		entry => (others => '0'),
+		flush => '0'
+	);
 
 	with alu_immed select
 		alu_y_in <=
