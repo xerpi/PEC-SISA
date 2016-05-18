@@ -5,7 +5,8 @@ USE ieee.numeric_std.all;
 use work.constants.all;
 
 ENTITY regfile_system IS
-    PORT (clk     : IN  STD_LOGIC;
+    PORT (boot    : IN  STD_LOGIC;
+			 clk     : IN  STD_LOGIC;
           wrd     : IN  STD_LOGIC;
           d       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
           addr_a  : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -25,25 +26,18 @@ END regfile_system;
 
 ARCHITECTURE Structure OF regfile_system IS
 	type REGISTERS_T is array (7 downto 0) of std_logic_vector(15 downto 0);
-	--signal registers: REGISTERS_T := (others => X"C000"); use this to do a loop in gtkwave
-	signal registers: REGISTERS_T := (
-		--Start the CPU in kernel mode
-		(15 downto 1 => '0') & system_mode_kernel,
-		(others => '0'),
-		(others => '0'),
-		(others => '0'),
-		(others => '0'),
-		(others => '0'),
-		(others => '0'),
-		(others => '0')
-	);
+	signal registers: REGISTERS_T := (others => (others => '0'));
 
 	-- Needed to store previous cycle alu output
 	signal addr_mem_reg: std_logic_vector(15 downto 0);
 BEGIN
-	process(clk)
+
+
+	process(clk, boot)
 	begin
-		if rising_edge(clk) then
+		if boot = '1' then
+			registers(7)(0) <= system_mode_kernel;
+		elsif rising_edge(clk) then
 			if reload_addr_mem = '1' then
 				addr_mem_reg <= addr_mem;
 			end if;
@@ -65,7 +59,10 @@ BEGIN
 				registers(0) <= registers(7); --restore status (S0 <- S7)
 				registers(1) <= d;            --S1 <- PCup
 				registers(2) <= (15 downto 4 => '0') & int_id;
-				registers(3) <= addr_mem_reg;
+				--If CALLS, don't overwrite service ID
+				if int_id /= X"E" then
+					registers(3) <= addr_mem_reg;
+				end if;
 				registers(7)(0) <= system_mode_kernel; --enter kernel mode
 				registers(7)(1) <= '0';       --disable interrupts (S7<1> <- 0)
 			end if;

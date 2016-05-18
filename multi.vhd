@@ -5,56 +5,57 @@ use work.constants.all;
 use work.opcodes.all;
 
 entity multi is
-    port(clk         : IN  STD_LOGIC;
-         boot        : IN  STD_LOGIC;
-	   --Interrupts enabled
-	   inten       : IN STD_LOGIC;
-	   --System mode (user or kernel)
-	   system_mode    : IN STD_LOGIC;
-	   --Interrupt request
-	   intr        : IN STD_LOGIC;
-         --Input signals to filter
-         ldpc_in     : IN  STD_LOGIC;
-         wrd_gen_in  : IN  STD_LOGIC;
-         wrd_sys_in  : IN  STD_LOGIC;
-         wr_m_in     : IN  STD_LOGIC;
-         w_b         : IN  STD_LOGIC;
-         wr_out_in   : IN  STD_LOGIC;
-         special_in  : IN  STD_LOGIC_VECTOR(2 downto 0);
-	   a_sys_in    : IN STD_LOGIC;
-	   in_d_in     : IN STD_LOGIC_VECTOR(2 downto 0);
-	   addr_a_in   : IN STD_LOGIC_VECTOR(2 downto 0);
-	   addr_d_in   : IN STD_LOGIC_VECTOR(2 downto 0);
-	   tkn_jmp_in  : IN STD_LOGIC_VECTOR(1 downto 0);
-         --Output signals filtered
-         ldpc_out    : OUT STD_LOGIC;
-         wrd_gen_out : OUT STD_LOGIC;
-         wrd_sys_out : OUT STD_LOGIC;
-         wrd         : OUT STD_LOGIC;
-         wr_m        : OUT STD_LOGIC;
-         ldir        : OUT STD_LOGIC;
-         ins_dad     : OUT STD_LOGIC;
-         word_byte   : OUT STD_LOGIC;
-         wr_out      : OUT STD_LOGIC;
-         special_out : OUT STD_LOGIC_VECTOR(2 downto 0);
-	   a_sys_out   : OUT STD_LOGIC;
-	   in_d_out    : OUT STD_LOGIC_VECTOR(2 downto 0);
-	   addr_a_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
-	   addr_d_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
-	   tkn_jmp_out : OUT STD_LOGIC_VECTOR(1 downto 0);
-		 --Interrupt ID
-		 int_id      : OUT STD_LOGIC_VECTOR(3 downto 0);
-		 --Exception requests
-		 exc_illegal_instr : IN STD_LOGIC;
-		 --Unaligned access
-		 unaligned_access : IN STD_LOGIC;
-		 --LOAD or STORE
-		 ir : IN STD_LOGIC_VECTOR(15 downto 0);
-		 div_by_zero: IN STD_LOGIC;
-		 reload_addr_mem : OUT STD_LOGIC;
-		 --Protected instruction
-		 protected_instr: IN STD_LOGIC;
-		 calls_instr : IN STD_LOGIC);
+    port(
+	clk         : IN  STD_LOGIC;
+	boot        : IN  STD_LOGIC;
+	--Interrupts enabled
+	inten       : IN STD_LOGIC;
+	--System mode (user or kernel)
+	system_mode    : IN STD_LOGIC;
+	--Interrupt request
+	intr        : IN STD_LOGIC;
+	--Input signals to filter
+	ldpc_in     : IN  STD_LOGIC;
+	wrd_gen_in  : IN  STD_LOGIC;
+	wrd_sys_in  : IN  STD_LOGIC;
+	wr_m_in     : IN  STD_LOGIC;
+	w_b         : IN  STD_LOGIC;
+	wr_out_in   : IN  STD_LOGIC;
+	special_in  : IN  STD_LOGIC_VECTOR(2 downto 0);
+	a_sys_in    : IN STD_LOGIC;
+	in_d_in     : IN STD_LOGIC_VECTOR(2 downto 0);
+	addr_a_in   : IN STD_LOGIC_VECTOR(2 downto 0);
+	addr_d_in   : IN STD_LOGIC_VECTOR(2 downto 0);
+	tkn_jmp_in  : IN STD_LOGIC_VECTOR(1 downto 0);
+	--Output signals filtered
+	ldpc_out    : OUT STD_LOGIC;
+	wrd_gen_out : OUT STD_LOGIC;
+	wrd_sys_out : OUT STD_LOGIC;
+	wrd         : OUT STD_LOGIC;
+	wr_m        : OUT STD_LOGIC;
+	ldir        : OUT STD_LOGIC;
+	ins_dad     : OUT STD_LOGIC;
+	word_byte   : OUT STD_LOGIC;
+	wr_out      : OUT STD_LOGIC;
+	special_out : OUT STD_LOGIC_VECTOR(2 downto 0);
+	a_sys_out   : OUT STD_LOGIC;
+	in_d_out    : OUT STD_LOGIC_VECTOR(2 downto 0);
+	addr_a_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
+	addr_d_out  : OUT STD_LOGIC_VECTOR(2 downto 0);
+	tkn_jmp_out : OUT STD_LOGIC_VECTOR(1 downto 0);
+	--Interrupt ID
+	int_id      : OUT STD_LOGIC_VECTOR(3 downto 0);
+	--Exception requests
+	exc_illegal_instr : IN STD_LOGIC;
+	--Unaligned access
+	unaligned_access : IN STD_LOGIC;
+	--LOAD or STORE
+	ir : IN STD_LOGIC_VECTOR(15 downto 0);
+	div_by_zero: IN STD_LOGIC;
+	reload_addr_mem : OUT STD_LOGIC;
+	--Protected instruction
+	protected_instr: IN STD_LOGIC;
+	calls_instr : IN STD_LOGIC);
 end entity;
 
 architecture Structure of multi is
@@ -77,6 +78,8 @@ architecture Structure of multi is
 	signal exc_protected_instr: std_logic := '0';
 	--Illegal CALLS (CALLS in system mode)
 	signal illegal_calls: std_logic := '0';
+	--CALLS instruction
+	signal exc_calls: std_logic := '0';
 
 	--OR of all the exception requests
 	signal exc_happened: std_logic := '0';
@@ -93,6 +96,7 @@ begin
 		'1' when exc_div_by_zero = '1' else
 		'1' when exc_protected_instr = '1' else
 		'1' when illegal_calls = '1' else
+		'1' when exc_calls = '1' else
 		'0';
 	--exc_happened <= '0';
 	-- If MemCntrl. reports unaligned_access only raise execption
@@ -103,12 +107,17 @@ begin
 		'0';
 
 	exc_protected_instr <=
-		'1' when protected_instr = '1' and system_mode = system_mode_user else
+		'1' when (protected_instr = '1') and (system_mode = system_mode_user) else
 		'0';
 
 	illegal_calls <=
-		'1' when calls_instr = '1' and system_mode = system_mode_kernel else
+		'1' when (calls_instr = '1') and (system_mode = system_mode_kernel) else
 		'0';
+
+	exc_calls <=
+		'1' when (calls_instr = '1') and (system_mode = system_mode_user) else
+		'0';
+
 
 	-- If Alu reports division by zero test if we are in MULT_DIV instr
 	exc_div_by_zero <=
@@ -142,10 +151,10 @@ begin
 						elsif exc_protected_instr = '1' then
 							state <= SYSTEM;
 							int_id <= exception_protected_instr;
-						end if;
-					elsif (calls_instr = '1') and (system_mode = system_mode_user) then
+						elsif exc_calls = '1' then
 							state <= SYSTEM;
 							int_id <= exception_calls;
+						end if;
 					elsif (intr = '1') and (inten = '1') then
 						state <= SYSTEM;
 						int_id <= exception_interrupt;
@@ -185,7 +194,11 @@ begin
 			(others => '0');
 
 	wr_out <= agregate_out(5);
-	wrd_sys_out <= agregate_out(4);
+
+	wrd_sys_out <=
+		'1' when (state = DEMW) and (calls_instr = '1') else -- when CALLS force S3 = Ra
+		agregate_out(4);
+
 	wrd_gen_out <= agregate_out(3);
 	wr_m <= agregate_out(2);
 	word_byte <= agregate_out(1);
@@ -200,20 +213,21 @@ begin
 			"101" when SYSTEM, -- force select reg_sys_a S5
 			addr_a_in when others;
 
-	with state select
-		addr_d_out <=
-			"001" when SYSTEM, -- force S1 = Pcup
-			addr_d_in when others;
+	addr_d_out <=
+			"001" when (state = SYSTEM) else -- force S1 = Pcup
+			"011" when (state = DEMW) and (calls_instr = '1') else -- when CALLS force S3 = Ra
+			addr_d_in;
 
 	with state select
 		in_d_out <=
 			in_d_cur_pc when SYSTEM, --Need for S1 = Pcup
 			in_d_in when others;
 
-	with state select
-		tkn_jmp_out <=
-			tkn_jmp_ja when SYSTEM, -- PC = reg_a = S5
-			tkn_jmp_in when others;
+	tkn_jmp_out <=
+		tkn_jmp_ja when state = SYSTEM else -- PC = reg_a = S5
+		--CALLS is seen as JAL (tkn_jmp_ja) but we don't want it to write to the PC
+		tkn_jmp_si when (state = DEMW) and (calls_instr = '1') else
+		tkn_jmp_in;
 
 
 	with state select

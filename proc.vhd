@@ -67,7 +67,8 @@ ARCHITECTURE Structure OF proc IS
 	END COMPONENT;
 
 	COMPONENT datapath IS
-		PORT (clk      : IN  STD_LOGIC;
+		PORT (boot      : IN  STD_LOGIC;
+				clk      : IN  STD_LOGIC;
 				op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
 				func     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 				wrd_gen  : IN  STD_LOGIC;
@@ -164,6 +165,7 @@ BEGIN
 	);
 
 	dp0: datapath port map(
+		boot => boot,
 		clk => clk,
 		op => uc0_op,
 		func => uc0_func,

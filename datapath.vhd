@@ -6,7 +6,8 @@ USE ieee.std_logic_unsigned.all;
 use work.constants.all;
 
 ENTITY datapath IS
-	PORT (clk      : IN  STD_LOGIC;
+	PORT (boot    : IN  STD_LOGIC;
+			clk      : IN  STD_LOGIC;
 			op       : IN  STD_LOGIC_VECTOR(1 DOWNTO 0);
 			func     : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 			wrd_gen  : IN  STD_LOGIC;
@@ -43,7 +44,8 @@ END datapath;
 ARCHITECTURE Structure OF datapath IS
 
 	COMPONENT regfiles IS
-	    PORT (clk     : IN  STD_LOGIC;
+	    PORT (boot    : IN  STD_LOGIC;
+		  clk     : IN  STD_LOGIC;
 		  wrd_gen : IN  STD_LOGIC;
 		  wrd_sys : IN  STD_LOGIC;
 		  d       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -109,6 +111,7 @@ BEGIN
 			regfiles0_b when others;
 
 	regfiles0: regfiles port map(
+		boot    => boot,
 		clk     => clk,
 		wrd_gen => wrd_gen,
 		wrd_sys => wrd_sys,

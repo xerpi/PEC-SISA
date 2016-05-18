@@ -62,6 +62,8 @@ ARCHITECTURE Structure OF control_l IS
 	signal c0_jmp_wrd_gen     : std_logic;
 	signal c0_jmp_rel_jmp_tkn : std_logic;
 	signal c0_jmp_abs_jmp_tkn : std_logic;
+	signal c0_jmp_func        : std_logic_vector(2 DOWNTO 0);
+	signal c0_jmp_in_d        : std_logic_vector(2 DOWNTO 0);
 
 	signal c0_io_wrd_gen      : std_logic;
 	signal c0_io_wr_out       : std_logic;
@@ -104,13 +106,18 @@ ARCHITECTURE Structure OF control_l IS
 	END COMPONENT;
 
 	COMPONENT control_l_jmp IS
-		PORT (ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-			alu_z      : IN STD_LOGIC;
-			wrd_gen_in     : IN STD_LOGIC;
-			wrd_gen_out    : OUT STD_LOGIC;
-			rel_jmp_tkn: OUT STD_LOGIC;
-			abs_jmp_tkn: OUT STD_LOGIC;
-			calls_instr : OUT STD_LOGIC);
+	    PORT (
+		ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		alu_z      : IN STD_LOGIC;
+		wrd_gen_in     : IN STD_LOGIC;
+		wrd_gen_out    : OUT STD_LOGIC;
+		rel_jmp_tkn: OUT STD_LOGIC;
+		abs_jmp_tkn: OUT STD_LOGIC;
+		calls_instr : OUT STD_LOGIC;
+		func_in   : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		func_out  : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+		in_d_in         : IN STD_LOGIC_VECTOR(2 downto 0);
+		in_d_out        : OUT STD_LOGIC_VECTOR(2 downto 0));
 	END COMPONENT;
 
 	COMPONENT control_l_io IS
@@ -178,7 +185,11 @@ BEGIN
 		wrd_gen_out => c0_jmp_wrd_gen,
 		rel_jmp_tkn => c0_jmp_rel_jmp_tkn,
 		abs_jmp_tkn => c0_jmp_abs_jmp_tkn,
-		calls_instr => calls_instr
+		calls_instr => calls_instr,
+		func_in     => c0_mov_func,
+		func_out    => c0_jmp_func,
+		in_d_in     => c0_g_in_d,
+		in_d_out    => c0_jmp_in_d
 	);
 
 	c0_io: control_l_io port map(
@@ -203,7 +214,7 @@ BEGIN
 		wrd_sys => c0_special_wrd_sys,
 		sys_reg_special => c0_special_special,
 		a_sys => a_sys,
-		in_d_in => c0_g_in_d,
+		in_d_in => c0_jmp_in_d,
 		in_d_out => c0_special_in_d,
 		inta => inta,
 		protected_special_instr => c0_special_protected_special_instr
@@ -222,7 +233,7 @@ BEGIN
 	word_byte <= c0_g_word_byte;
 	alu_immed <= c0_g_alu_immed;
 
-	func <= c0_mov_func;
+	func <= c0_jmp_func;
 
 	wrd_gen <= c0_special_wrd_gen;
 	wrd_sys <= c0_special_wrd_sys;
@@ -232,7 +243,7 @@ BEGIN
 
 	wr_out <= c0_io_wr_out;
 	rd_in <= c0_io_rd_in;
-	
+
 	protected_instr <=
 		'1' when c0_special_protected_special_instr = '1' else
 		--'1' when c0_io_protected_io_instr = '1' else

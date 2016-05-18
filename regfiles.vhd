@@ -3,7 +3,8 @@ USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 
 ENTITY regfiles IS
-    PORT (clk     : IN  STD_LOGIC;
+    PORT (boot    : IN  STD_LOGIC;
+			 clk     : IN  STD_LOGIC;
           wrd_gen : IN  STD_LOGIC;
           wrd_sys : IN  STD_LOGIC;
           d       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -39,7 +40,8 @@ ARCHITECTURE Structure OF regfiles IS
 	END COMPONENT;
 
 	COMPONENT regfile_system IS
-	    PORT (clk     : IN  STD_LOGIC;
+	    PORT (boot    : IN  STD_LOGIC;
+		  clk     : IN  STD_LOGIC;
 		  wrd     : IN  STD_LOGIC;
 		  d       : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 		  addr_a  : IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -74,6 +76,7 @@ BEGIN
 	);
 
 	reg_system0: regfile_system port map(
+		boot    => boot,
 		clk     => clk,
 		wrd     => wrd_sys,
 		d       => d,

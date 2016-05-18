@@ -8,17 +8,22 @@ use work.constants.all;
 
 -- It modifies wrd when JAL. Also does Tkn_jmp mux selection
 ENTITY control_l_jmp IS
-    PORT (ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-    	    alu_z      : IN STD_LOGIC;
-            wrd_gen_in     : IN STD_LOGIC;
-            wrd_gen_out    : OUT STD_LOGIC;
-            rel_jmp_tkn: OUT STD_LOGIC;
-            abs_jmp_tkn: OUT STD_LOGIC;
-				calls_instr : OUT STD_LOGIC);
+    PORT (
+	ir         : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	alu_z      : IN STD_LOGIC;
+	wrd_gen_in     : IN STD_LOGIC;
+	wrd_gen_out    : OUT STD_LOGIC;
+	rel_jmp_tkn: OUT STD_LOGIC;
+	abs_jmp_tkn: OUT STD_LOGIC;
+	calls_instr : OUT STD_LOGIC;
+	func_in   : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+	func_out  : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+	in_d_in         : IN STD_LOGIC_VECTOR(2 downto 0);
+	in_d_out        : OUT STD_LOGIC_VECTOR(2 downto 0));
 END control_l_jmp;
 
 ARCHITECTURE Structure OF control_l_jmp IS
-	
+
 	constant F_CALLS: std_logic_vector(2 downto 0) := "111";
 
 
@@ -52,11 +57,21 @@ BEGIN
 		wrd_gen_out <=
 			wrd_allow when "11",
 			wrd_gen_in when others;
-			
-	
+
+
 	calls_instr <=
 		'1' when (func = F_CALLS) and (opcode = ABSOLUTE_JUMP) else
 		'0';
+
+	--If it's a CALLS, we need to pass Ra to S3, so pass Ra through the ALU
+	func_out <=
+		func_dec_pass_x when (func = F_CALLS) and (opcode = ABSOLUTE_JUMP) else
+		func_in;
+
+	--If it's a CALLS, we need to pass Ra to S3, so pass Ra through the ALU
+	in_d_out <=
+		in_d_alu when (func = F_CALLS) and (opcode = ABSOLUTE_JUMP) else
+		in_d_in;
 
 	rel_jmp_tkn <= instr_rel_jmp and (ir(8) xor alu_z);
 	abs_jmp_tkn <= instr_abs_jmp and ((ir(0) xor alu_z) or ir(1) or ir(2));
