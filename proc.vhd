@@ -63,7 +63,19 @@ ARCHITECTURE Structure OF proc IS
 			--Unaligned access
 			unaligned_access : IN STD_LOGIC;
 			div_by_zero: IN STD_LOGIC;
-			reload_addr_mem : OUT STD_LOGIC);
+			reload_addr_mem : OUT STD_LOGIC;
+			--TLB
+			ITLB_miss : IN STD_LOGIC;
+			ITLB_v    : IN STD_LOGIC;
+			ITLB_p    : IN STD_LOGIC;
+			DTLB_miss : IN STD_LOGIC;
+			DTLB_v    : IN STD_LOGIC;
+			DTLB_r    : IN STD_LOGIC;
+			DTLB_p    : IN STD_LOGIC;
+			tlb_flush : OUT STD_LOGIC;
+			ITLB_wr   : OUT STD_LOGIC;
+			DTLB_wr   : OUT STD_LOGIC;
+			TLB_phys  : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT datapath IS
@@ -99,7 +111,19 @@ ARCHITECTURE Structure OF proc IS
 				--Interrupt ID
 				int_id   : IN STD_LOGIC_VECTOR(3 downto 0);
 				div_by_zero: OUT STD_LOGIC;
-				reload_addr_mem : IN STD_LOGIC);
+				reload_addr_mem : IN STD_LOGIC;
+				--TLB
+				ITLB_miss : OUT STD_LOGIC;
+				ITLB_v    : OUT STD_LOGIC;
+				ITLB_p    : OUT STD_LOGIC;
+				DTLB_miss : OUT STD_LOGIC;
+				DTLB_v    : OUT STD_LOGIC;
+				DTLB_r    : OUT STD_LOGIC;
+				DTLB_p    : OUT STD_LOGIC;
+				tlb_flush : IN STD_LOGIC;
+				ITLB_wr   : IN STD_LOGIC;
+				DTLB_wr   : IN STD_LOGIC;
+				TLB_phys  : IN STD_LOGIC);
 	END COMPONENT;
 
 	signal uc0_op: std_logic_vector(1 downto 0);
@@ -118,12 +142,23 @@ ARCHITECTURE Structure OF proc IS
 	signal uc0_special: std_logic_vector(2 downto 0);
 	signal uc0_int_id: std_logic_vector(3 downto 0);
 	signal uc0_reload_addr_mem: std_logic;
+	signal uc0_tlb_flush: std_logic;
+	signal uc0_ITLB_wr: std_logic;
+	signal uc0_DTLB_wr: std_logic;
+	signal uc0_TLB_phys: std_logic;
 
 	signal dp0_alu_z: std_logic;
 	signal dp0_reg_a: std_logic_vector(15 downto 0);
 	signal dp0_inten: std_logic;
 	signal dp0_system_mode: std_logic;
 	signal dp0_div_by_zero: std_logic;
+	signal dp0_ITLB_miss: std_logic;
+	signal dp0_ITLB_v: std_logic;
+	signal dp0_ITLB_p: std_logic;
+	signal dp0_DTLB_miss: std_logic;
+	signal dp0_DTLB_v: std_logic;
+	signal dp0_DTLB_r: std_logic;
+	signal dp0_DTLB_p: std_logic;
 
 BEGIN
 
@@ -161,7 +196,18 @@ BEGIN
 		int_id => uc0_int_id,
 		unaligned_access => unaligned_access,
 		div_by_zero => dp0_div_by_zero,
-		reload_addr_mem => uc0_reload_addr_mem
+		reload_addr_mem => uc0_reload_addr_mem,
+		ITLB_miss => dp0_ITLB_miss,
+		ITLB_v    => dp0_ITLB_v,
+		ITLB_p    => dp0_ITLB_p,
+		DTLB_miss => dp0_DTLB_miss,
+		DTLB_v    => dp0_DTLB_v,
+		DTLB_r    => dp0_DTLB_r,
+		DTLB_p    => dp0_DTLB_p,
+		tlb_flush => uc0_tlb_flush,
+		ITLB_wr   => uc0_ITLB_wr,
+		DTLB_wr   => uc0_DTLB_wr,
+		TLB_phys  => uc0_TLB_phys
 	);
 
 	dp0: datapath port map(
@@ -192,7 +238,18 @@ BEGIN
 		system_mode => dp0_system_mode,
 		int_id => uc0_int_id,
 		div_by_zero => dp0_div_by_zero,
-		reload_addr_mem => uc0_reload_addr_mem
+		reload_addr_mem => uc0_reload_addr_mem,
+		ITLB_miss => dp0_ITLB_miss,
+		ITLB_v    => dp0_ITLB_v,
+		ITLB_p    => dp0_ITLB_p,
+		DTLB_miss => dp0_DTLB_miss,
+		DTLB_v    => dp0_DTLB_v,
+		DTLB_r    => dp0_DTLB_r,
+		DTLB_p    => dp0_DTLB_p,
+		tlb_flush => uc0_tlb_flush,
+		ITLB_wr   => uc0_ITLB_wr,
+		DTLB_wr   => uc0_DTLB_wr,
+		TLB_phys  => uc0_TLB_phys
 	);
 
 	addr_io <= uc0_immed(7 downto 0);

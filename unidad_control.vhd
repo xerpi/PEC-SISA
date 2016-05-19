@@ -43,7 +43,19 @@ ENTITY unidad_control IS
 		--Unaligned access
 		unaligned_access : IN STD_LOGIC;
 		div_by_zero: IN STD_LOGIC;
-		reload_addr_mem : OUT STD_LOGIC);
+		reload_addr_mem : OUT STD_LOGIC;
+		--TLB
+		ITLB_miss : IN STD_LOGIC;
+		ITLB_v    : IN STD_LOGIC;
+		ITLB_p    : IN STD_LOGIC;
+		DTLB_miss : IN STD_LOGIC;
+		DTLB_v    : IN STD_LOGIC;
+		DTLB_r    : IN STD_LOGIC;
+		DTLB_p    : IN STD_LOGIC;
+		tlb_flush : OUT STD_LOGIC;
+		ITLB_wr   : OUT STD_LOGIC;
+		DTLB_wr   : OUT STD_LOGIC;
+		TLB_phys  : OUT STD_LOGIC);
 END unidad_control;
 
 ARCHITECTURE Structure OF unidad_control IS
@@ -86,7 +98,11 @@ ARCHITECTURE Structure OF unidad_control IS
 			exc_illegal_instr : OUT STD_LOGIC;
 			--Protected instruction
 			protected_instr: OUT STD_LOGIC;
-			calls_instr : OUT STD_LOGIC);
+			calls_instr : OUT STD_LOGIC;
+			tlb_flush : OUT STD_LOGIC;
+			ITLB_wr   : OUT STD_LOGIC;
+			DTLB_wr   : OUT STD_LOGIC;
+			TLB_phys  : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT multi is
@@ -139,7 +155,21 @@ ARCHITECTURE Structure OF unidad_control IS
 		 reload_addr_mem : OUT STD_LOGIC;
 		 --Protected instruction
 		 protected_instr: IN STD_LOGIC;
-		 calls_instr : IN STD_LOGIC);
+		 calls_instr : IN STD_LOGIC;
+		--TLB
+		ITLB_miss : IN STD_LOGIC;
+		ITLB_v    : IN STD_LOGIC;
+		ITLB_p    : IN STD_LOGIC;
+		DTLB_miss : IN STD_LOGIC;
+		DTLB_v    : IN STD_LOGIC;
+		DTLB_r    : IN STD_LOGIC;
+		DTLB_p    : IN STD_LOGIC;
+		tlb_flush_in : IN STD_LOGIC;
+		ITLB_wr_in   : IN STD_LOGIC;
+		DTLB_wr_in   : IN STD_LOGIC;
+		tlb_flush_out : OUT STD_LOGIC;
+		ITLB_wr_out   : OUT STD_LOGIC;
+		DTLB_wr_out   : OUT STD_LOGIC);
 	END COMPONENT;
 
 	--Registers
@@ -165,6 +195,9 @@ ARCHITECTURE Structure OF unidad_control IS
 	signal c0_exc_illegal_instr: std_logic;
 	signal c0_protected_instr: std_logic;
 	signal c0_calls_instr: std_logic;
+	signal c0_ITLB_wr : std_logic;
+	signal c0_DTLB_wr : std_logic;
+	signal c0_tlb_flush : std_logic;
 
 	signal c0_tkn_jmp: std_logic_vector(1 downto 0);
 
@@ -242,7 +275,10 @@ BEGIN
 		inta => inta,
 		exc_illegal_instr => c0_exc_illegal_instr,
 		protected_instr => c0_protected_instr,
-		calls_instr => c0_calls_instr
+		calls_instr => c0_calls_instr,
+		tlb_flush => c0_tlb_flush,
+		ITLB_wr   => c0_ITLB_wr,
+		DTLB_wr   => c0_DTLB_wr
 	);
 
 	m0: multi port map(
@@ -289,7 +325,20 @@ BEGIN
 		div_by_zero => div_by_zero,
 		reload_addr_mem => reload_addr_mem,
 		protected_instr => c0_protected_instr,
-		calls_instr => c0_calls_instr
+		calls_instr => c0_calls_instr,
+		ITLB_miss => ITLB_miss,
+		ITLB_v    => ITLB_v,
+		ITLB_p    => ITLB_p,
+		DTLB_miss => DTLB_miss,
+		DTLB_v    => DTLB_v,
+		DTLB_r    => DTLB_r,
+		DTLB_p    => DTLB_p,
+		tlb_flush_in => c0_tlb_flush,
+		ITLB_wr_in   => c0_ITLB_wr,
+		DTLB_wr_in   => c0_DTLB_wr,
+		tlb_flush_out => tlb_flush,
+		ITLB_wr_out   => ITLB_wr,
+		DTLB_wr_out   => DTLB_wr
 	);
 
 	immed <= c0_immed;

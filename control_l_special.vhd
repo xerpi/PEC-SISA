@@ -25,7 +25,11 @@ ENTITY control_l_special IS
 			--Interrupt ack
 			inta      : OUT STD_LOGIC;
 			--Protected special instruction
-			protected_special_instr: OUT STD_LOGIC);
+			protected_special_instr: OUT STD_LOGIC;
+			tlb_flush : OUT STD_LOGIC;
+			ITLB_wr   : OUT STD_LOGIC;
+			DTLB_wr   : OUT STD_LOGIC;
+			TLB_phys  : OUT STD_LOGIC);
 END control_l_special;
 
 ARCHITECTURE Structure OF control_l_special IS
@@ -36,6 +40,11 @@ ARCHITECTURE Structure OF control_l_special IS
 	constant F_GETIID: std_logic_vector(4 downto 0) := "01000";
 	constant F_RDS:    std_logic_vector(4 downto 0) := "01100";
 	constant F_WRS:    std_logic_vector(4 downto 0) := "10000";
+	constant F_WRPI:   std_logic_vector(4 downto 0) := "10100";
+	constant F_WRVI:   std_logic_vector(4 downto 0) := "10101";
+	constant F_WRPD:   std_logic_vector(4 downto 0) := "10110";
+	constant F_WRVD:   std_logic_vector(4 downto 0) := "10111";
+	constant F_FLUSH:  std_logic_vector(4 downto 0) := "11000";
 	constant F_HALT:   std_logic_vector(4 downto 0) := "11111";
 
 	signal func: std_logic_vector(4 downto 0);
@@ -86,6 +95,22 @@ BEGIN
 		special_di when func = F_DI and opcode = SPECIAL else
 		special_reti when func = F_RETI and opcode = SPECIAL else
 		special_none;
+		
+	tlb_flush <=
+		'1' when func = F_FLUSH and opcode = SPECIAL else
+		'0';
+		
+	ITLB_wr <=
+		'1' when ((func = F_WRVI) or (func = F_WRPI)) and opcode = SPECIAL else
+		'0';
+		
+	DTLB_wr <=
+		'1' when ((func = F_WRVD) or (func = F_WRPD)) and opcode = SPECIAL else
+		'0';
+		
+	TLB_phys <=
+		'1' when ((func = F_WRPI) or (func = F_WRPD)) and opcode = SPECIAL else
+		'0';
 
 	protected_special_instr <=
 		'1' when func = F_RDS and opcode = SPECIAL else
@@ -94,6 +119,11 @@ BEGIN
 		'1' when func = F_DI and opcode = SPECIAL else
 		'1' when func = F_RETI and opcode = SPECIAL else
 		'1' when func = F_GETIID and opcode = SPECIAL else
+		'1' when func = F_WRPI and opcode = SPECIAL else
+		'1' when func = F_WRVI and opcode = SPECIAL else
+		'1' when func = F_WRPD and opcode = SPECIAL else
+		'1' when func = F_WRVD and opcode = SPECIAL else
+		'1' when func = F_FLUSH and opcode = SPECIAL else
 		'0';
 		
 		

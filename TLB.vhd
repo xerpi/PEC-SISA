@@ -10,11 +10,12 @@ ENTITY TLB IS
 		pfn   : OUT STD_LOGIC_VECTOR(3 downto 0);
 		v     : OUT STD_LOGIC;
 		r     : OUT STD_LOGIC;
+		p     : OUT STD_LOGIC;
 		miss  : OUT STD_LOGIC;
 		wr    : IN  STD_LOGIC;
 		phys  : IN  STD_LOGIC;
 		index : IN  STD_LOGIC_VECTOR(2 downto 0);
-		entry : IN  STD_LOGIC_VECTOR(5 downto 0);
+		entry : IN  STD_LOGIC_VECTOR(6 downto 0);
 		flush : IN  STD_LOGIC
 	);
 END TLB;
@@ -23,7 +24,7 @@ ARCHITECTURE Structure OF TLB IS
 
 	function log2(v : std_logic_vector) return integer is
 	begin
-		for i in v'high downto v'low loop
+		for i in v'range loop
 			if v(i) = '1' then
 				return i;
 			end if;
@@ -36,6 +37,7 @@ ARCHITECTURE Structure OF TLB IS
 		pfn : std_logic_vector(3 downto 0);
 		v   : std_logic;
 		r   : std_logic;
+		p   : std_logic;
 	end record;
 
 	type TLB_entries is array(7 downto 0) of TLB_entry;
@@ -46,6 +48,9 @@ ARCHITECTURE Structure OF TLB IS
 	constant TLB_entry_access_rw : std_logic := '0';
 	constant TLB_entry_access_ro : std_logic := '1';
 
+	constant TLB_entry_protection_off : std_logic := '0';
+	constant TLB_entry_protection_on  : std_logic := '1';
+	
 	signal entries: TLB_entries;
 
 	signal match       : std_logic_vector(7 downto 0);
@@ -58,20 +63,36 @@ BEGIN
 	begin
 		if boot = '1' then
 			--Setup user pages(0x0000 to 0x2FFF)
-			for i in 0 to 2 loop
+			for i in 0 to 0 loop
 				entries(i) <= (
 					vpn => std_logic_vector(to_unsigned(i, entries(i).vpn'length)),
 					pfn => std_logic_vector(to_unsigned(i, entries(i).pfn'length)),
 					v   => TLB_entry_status_valid,
-					r   => TLB_entry_access_ro
+					r   => TLB_entry_access_rw,
+					p   => TLB_entry_protection_off
 				);
 			end loop;
+			entries(1) <= (
+				vpn => X"A",
+				pfn => X"A",
+				v   => TLB_entry_status_valid,
+				r   => TLB_entry_access_rw,
+				p   => TLB_entry_protection_on
+			);
+			entries(2) <= (
+				vpn => X"B",
+				pfn => X"B",
+				v   => TLB_entry_status_valid,
+				r   => TLB_entry_access_rw,
+				p   => TLB_entry_protection_on
+			);
 			--Setup kernel pages(0x8000 to 0x8FFF)
 			entries(3) <= (
 				vpn => X"8",
 				pfn => X"8",
 				v   => TLB_entry_status_valid,
-				r   => TLB_entry_access_ro
+				r   => TLB_entry_access_rw,
+				p   => TLB_entry_protection_on
 			);
 			--Setup kernel pages(0xC000 to 0xFFFF)
 			for i in 0 to 3 loop
@@ -79,7 +100,8 @@ BEGIN
 					vpn => std_logic_vector(to_unsigned(i + 16#C#, entries(i).vpn'length)),
 					pfn => std_logic_vector(to_unsigned(i + 16#C#, entries(i).pfn'length)),
 					v   => TLB_entry_status_valid,
-					r   => TLB_entry_access_ro
+					r   => TLB_entry_access_ro,
+					p   => TLB_entry_protection_on
 				);
 			end loop;
 		elsif rising_edge(clk) then
@@ -92,6 +114,7 @@ BEGIN
 					entries(to_integer(unsigned(index))).pfn <= entry(3 downto 0);
 					entries(to_integer(unsigned(index))).v <= entry(4);
 					entries(to_integer(unsigned(index))).r <= entry(5);
+					entries(to_integer(unsigned(index))).p <= entry(6);
 				else
 					entries(to_integer(unsigned(index))).vpn <= entry(3 downto 0);
 				end if;
@@ -112,6 +135,7 @@ BEGIN
 	pfn <= entries(match_entry).pfn;
 	v <= entries(match_entry).v;
 	r <= entries(match_entry).r;
+	p <= entries(match_entry).p;
 
 	miss <= '1' when first_match = "000" else '0';
 

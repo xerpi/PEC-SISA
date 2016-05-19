@@ -38,7 +38,19 @@ ENTITY datapath IS
 			--Interrupt ID
 			int_id  : IN STD_LOGIC_VECTOR(3 downto 0);
 			div_by_zero: OUT STD_LOGIC;
-			reload_addr_mem : IN STD_LOGIC);
+			reload_addr_mem : IN STD_LOGIC;
+			--TLB
+			ITLB_miss : OUT STD_LOGIC;
+			ITLB_v    : OUT STD_LOGIC;
+			ITLB_p    : OUT STD_LOGIC;
+			DTLB_miss : OUT STD_LOGIC;
+			DTLB_v    : OUT STD_LOGIC;
+			DTLB_r    : OUT STD_LOGIC;
+			DTLB_p    : OUT STD_LOGIC;
+			tlb_flush : IN STD_LOGIC;
+			ITLB_wr   : IN STD_LOGIC;
+			DTLB_wr   : IN STD_LOGIC;
+			TLB_phys  : IN STD_LOGIC);
 END datapath;
 
 ARCHITECTURE Structure OF datapath IS
@@ -86,11 +98,12 @@ ARCHITECTURE Structure OF datapath IS
 			pfn   : OUT STD_LOGIC_VECTOR(3 downto 0);
 			v     : OUT STD_LOGIC;
 			r     : OUT STD_LOGIC;
+			p     : OUT STD_LOGIC;
 			miss  : OUT STD_LOGIC;
 			wr    : IN  STD_LOGIC;
 			phys  : IN  STD_LOGIC;
 			index : IN  STD_LOGIC_VECTOR(2 downto 0);
-			entry : IN  STD_LOGIC_VECTOR(5 downto 0);
+			entry : IN  STD_LOGIC_VECTOR(6 downto 0);
 			flush : IN  STD_LOGIC
 		);
 	END COMPONENT;
@@ -123,14 +136,15 @@ BEGIN
 		clk   => clk,
 		vpn   => pc(15 downto 12),
 		pfn   => ITLB0_pfn,
-		v     => open,
+		v     => ITLB_v,
 		r     => open,
-		miss  => open,
-		wr    => '0',
-		phys  => '0',
-		index => (others => '0'),
-		entry => (others => '0'),
-		flush => '0'
+		p     => ITLB_p,
+		miss  => ITLB_miss,
+		wr    => ITLB_wr,
+		phys  => TLB_phys,
+		index => regfiles0_a(2 downto 0),
+		entry => regfiles0_b(6 downto 0),
+		flush => tlb_flush
 
 	);
 
@@ -139,14 +153,15 @@ BEGIN
 		clk   => clk,
 		vpn   => alu0_w(15 downto 12),
 		pfn   => DTLB0_pfn,
-		v     => open,
-		r     => open,
-		miss  => open,
-		wr    => '0',
-		phys  => '0',
-		index => (others => '0'),
-		entry => (others => '0'),
-		flush => '0'
+		v     => DTLB_v,
+		r     => DTLB_r,
+		p     => DTLB_p,
+		miss  => DTLB_miss,
+		wr    => DTLB_wr,
+		phys  => TLB_phys,
+		index => regfiles0_a(2 downto 0),
+		entry => regfiles0_b(6 downto 0),
+		flush => tlb_flush
 	);
 
 	with ins_dad select

@@ -67,6 +67,13 @@ package constants is
 	constant exception_illegal_instr    : std_logic_vector(3 downto 0) := X"0";
 	constant exception_unaligned_access : std_logic_vector(3 downto 0) := X"1";
 	constant exception_division_by_zero : std_logic_vector(3 downto 0) := X"4";
+	constant exception_ITLB_miss        : std_logic_vector(3 downto 0) := X"6";
+	constant exception_DTLB_miss        : std_logic_vector(3 downto 0) := X"7";
+	constant exception_ITLB_invalid     : std_logic_vector(3 downto 0) := X"8";
+	constant exception_DTLB_invalid     : std_logic_vector(3 downto 0) := X"9";
+	constant exception_ITLB_protected   : std_logic_vector(3 downto 0) := X"A";
+	constant exception_DTLB_protected   : std_logic_vector(3 downto 0) := X"B";
+	constant exception_DTLB_readonly    : std_logic_vector(3 downto 0) := X"C";
 	constant exception_protected_instr  : std_logic_vector(3 downto 0) := X"D";
 	constant exception_calls            : std_logic_vector(3 downto 0) := X"E";
 	constant exception_interrupt        : std_logic_vector(3 downto 0) := X"F";

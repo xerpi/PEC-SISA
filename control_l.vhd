@@ -39,7 +39,11 @@ ENTITY control_l IS
 		exc_illegal_instr : OUT STD_LOGIC;
 		--Protected instruction
 		protected_instr: OUT STD_LOGIC;
-		calls_instr : OUT STD_LOGIC);
+		calls_instr : OUT STD_LOGIC;
+		tlb_flush   : OUT STD_LOGIC;
+		ITLB_wr   : OUT STD_LOGIC;
+		DTLB_wr   : OUT STD_LOGIC;
+		TLB_phys  : OUT STD_LOGIC);
 END control_l;
 
 ARCHITECTURE Structure OF control_l IS
@@ -148,7 +152,11 @@ ARCHITECTURE Structure OF control_l IS
 		   --Interrupt ack
 		   inta      : OUT STD_LOGIC;
 			--Protected special instruction
-			protected_special_instr: OUT STD_LOGIC);
+			protected_special_instr: OUT STD_LOGIC;
+			tlb_flush : OUT STD_LOGIC;
+			ITLB_wr   : OUT STD_LOGIC;
+			DTLB_wr   : OUT STD_LOGIC;
+			TLB_phys  : OUT STD_LOGIC);
 	END COMPONENT;
 
 
@@ -217,7 +225,11 @@ BEGIN
 		in_d_in => c0_jmp_in_d,
 		in_d_out => c0_special_in_d,
 		inta => inta,
-		protected_special_instr => c0_special_protected_special_instr
+		protected_special_instr => c0_special_protected_special_instr,
+		tlb_flush => tlb_flush,
+		ITLB_wr   => ITLB_wr,
+		DTLB_wr   => DTLB_wr,
+		TLB_phys  => TLB_phys
 	);
 
 	op <= c0_g_op;
