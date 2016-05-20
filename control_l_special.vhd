@@ -76,9 +76,9 @@ BEGIN
 
 	--If special and not WRS or TLB instructions, select SYSTEM regfile
 	a_sys <=
-		'0' when (opcode = SPECIAL) and ((func = F_WRS) or (func = F_WRPI) or (func = F_WRVI) or
+		'1' when (opcode = SPECIAL) and not ((func = F_WRS) or (func = F_WRPI) or (func = F_WRVI) or
 		         (func = F_WRPD) or (func = F_WRVD)) else
-		'1';
+		'0';
 
 
 	abs_jmp_tkn_out <=
