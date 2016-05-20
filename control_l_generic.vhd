@@ -71,7 +71,7 @@ BEGIN
 			legal_instruction & 'X'            & addr_b_11_dt_9 & "XX"           & "XXX"           & "XX"            & immed_sel_se_eight    & wrd_deny & wr_m_deny  & ldpc_continue & in_d_io     & 'X'         & "X"             when IN_OUT,
 
 			--Special instuctions
-			legal_instruction & addr_a_8_dt_6  & 'X'            & op_misc_unit   & func_dec_pass_x & func_sel_dec    & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & 'X'             when SPECIAL, -- HALT by default
+			legal_instruction & addr_a_8_dt_6  & addr_b_11_dt_9 & op_misc_unit   & func_dec_pass_x & func_sel_dec    & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & in_d_alu    & 'X'         & 'X'             when SPECIAL, -- HALT by default
 
 			--Illegal (not implemented) instruction
 			illegal_instruction & 'X'          & 'X'            & "XX"           & "XXX"           & "XX"            & "XX"                  & wrd_deny & wr_m_deny  & ldpc_continue & "XXX"       & 'X'         & 'X'             when others;

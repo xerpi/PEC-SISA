@@ -72,7 +72,7 @@ ARCHITECTURE Structure OF proc IS
 			DTLB_v    : IN STD_LOGIC;
 			DTLB_r    : IN STD_LOGIC;
 			DTLB_p    : IN STD_LOGIC;
-			tlb_flush : OUT STD_LOGIC;
+			TLB_flush : OUT STD_LOGIC;
 			ITLB_wr   : OUT STD_LOGIC;
 			DTLB_wr   : OUT STD_LOGIC;
 			TLB_phys  : OUT STD_LOGIC);
@@ -120,7 +120,7 @@ ARCHITECTURE Structure OF proc IS
 				DTLB_v    : OUT STD_LOGIC;
 				DTLB_r    : OUT STD_LOGIC;
 				DTLB_p    : OUT STD_LOGIC;
-				tlb_flush : IN STD_LOGIC;
+				TLB_flush : IN STD_LOGIC;
 				ITLB_wr   : IN STD_LOGIC;
 				DTLB_wr   : IN STD_LOGIC;
 				TLB_phys  : IN STD_LOGIC);
@@ -142,7 +142,7 @@ ARCHITECTURE Structure OF proc IS
 	signal uc0_special: std_logic_vector(2 downto 0);
 	signal uc0_int_id: std_logic_vector(3 downto 0);
 	signal uc0_reload_addr_mem: std_logic;
-	signal uc0_tlb_flush: std_logic;
+	signal uc0_TLB_flush: std_logic;
 	signal uc0_ITLB_wr: std_logic;
 	signal uc0_DTLB_wr: std_logic;
 	signal uc0_TLB_phys: std_logic;
@@ -204,7 +204,7 @@ BEGIN
 		DTLB_v    => dp0_DTLB_v,
 		DTLB_r    => dp0_DTLB_r,
 		DTLB_p    => dp0_DTLB_p,
-		tlb_flush => uc0_tlb_flush,
+		TLB_flush => uc0_TLB_flush,
 		ITLB_wr   => uc0_ITLB_wr,
 		DTLB_wr   => uc0_DTLB_wr,
 		TLB_phys  => uc0_TLB_phys
@@ -246,7 +246,7 @@ BEGIN
 		DTLB_v    => dp0_DTLB_v,
 		DTLB_r    => dp0_DTLB_r,
 		DTLB_p    => dp0_DTLB_p,
-		tlb_flush => uc0_tlb_flush,
+		TLB_flush => uc0_TLB_flush,
 		ITLB_wr   => uc0_ITLB_wr,
 		DTLB_wr   => uc0_DTLB_wr,
 		TLB_phys  => uc0_TLB_phys

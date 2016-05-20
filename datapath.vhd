@@ -47,7 +47,7 @@ ENTITY datapath IS
 			DTLB_v    : OUT STD_LOGIC;
 			DTLB_r    : OUT STD_LOGIC;
 			DTLB_p    : OUT STD_LOGIC;
-			tlb_flush : IN STD_LOGIC;
+			TLB_flush : IN STD_LOGIC;
 			ITLB_wr   : IN STD_LOGIC;
 			DTLB_wr   : IN STD_LOGIC;
 			TLB_phys  : IN STD_LOGIC);
@@ -144,7 +144,7 @@ BEGIN
 		phys  => TLB_phys,
 		index => regfiles0_a(2 downto 0),
 		entry => regfiles0_b(6 downto 0),
-		flush => tlb_flush
+		flush => TLB_flush
 
 	);
 
@@ -161,7 +161,7 @@ BEGIN
 		phys  => TLB_phys,
 		index => regfiles0_a(2 downto 0),
 		entry => regfiles0_b(6 downto 0),
-		flush => tlb_flush
+		flush => TLB_flush
 	);
 
 	with ins_dad select

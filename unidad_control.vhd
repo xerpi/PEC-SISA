@@ -52,7 +52,7 @@ ENTITY unidad_control IS
 		DTLB_v    : IN STD_LOGIC;
 		DTLB_r    : IN STD_LOGIC;
 		DTLB_p    : IN STD_LOGIC;
-		tlb_flush : OUT STD_LOGIC;
+		TLB_flush : OUT STD_LOGIC;
 		ITLB_wr   : OUT STD_LOGIC;
 		DTLB_wr   : OUT STD_LOGIC;
 		TLB_phys  : OUT STD_LOGIC);
@@ -99,7 +99,7 @@ ARCHITECTURE Structure OF unidad_control IS
 			--Protected instruction
 			protected_instr: OUT STD_LOGIC;
 			calls_instr : OUT STD_LOGIC;
-			tlb_flush : OUT STD_LOGIC;
+			TLB_flush : OUT STD_LOGIC;
 			ITLB_wr   : OUT STD_LOGIC;
 			DTLB_wr   : OUT STD_LOGIC;
 			TLB_phys  : OUT STD_LOGIC);
@@ -164,10 +164,10 @@ ARCHITECTURE Structure OF unidad_control IS
 		DTLB_v    : IN STD_LOGIC;
 		DTLB_r    : IN STD_LOGIC;
 		DTLB_p    : IN STD_LOGIC;
-		tlb_flush_in : IN STD_LOGIC;
+		TLB_flush_in : IN STD_LOGIC;
 		ITLB_wr_in   : IN STD_LOGIC;
 		DTLB_wr_in   : IN STD_LOGIC;
-		tlb_flush_out : OUT STD_LOGIC;
+		TLB_flush_out : OUT STD_LOGIC;
 		ITLB_wr_out   : OUT STD_LOGIC;
 		DTLB_wr_out   : OUT STD_LOGIC);
 	END COMPONENT;
@@ -197,7 +197,7 @@ ARCHITECTURE Structure OF unidad_control IS
 	signal c0_calls_instr: std_logic;
 	signal c0_ITLB_wr : std_logic;
 	signal c0_DTLB_wr : std_logic;
-	signal c0_tlb_flush : std_logic;
+	signal c0_TLB_flush : std_logic;
 
 	signal c0_tkn_jmp: std_logic_vector(1 downto 0);
 
@@ -276,16 +276,17 @@ BEGIN
 		exc_illegal_instr => c0_exc_illegal_instr,
 		protected_instr => c0_protected_instr,
 		calls_instr => c0_calls_instr,
-		tlb_flush => c0_tlb_flush,
+		TLB_flush => c0_TLB_flush,
 		ITLB_wr   => c0_ITLB_wr,
-		DTLB_wr   => c0_DTLB_wr
+		DTLB_wr   => c0_DTLB_wr,
+		TLB_phys  => TLB_phys
 	);
 
 	m0: multi port map(
 		clk         => clk,
 		boot        => boot,
 		inten       => inten,
-	   system_mode => system_mode,
+		system_mode => system_mode,
 		intr        => intr,
 		--Input signals
 		ldpc_in     => c0_ldpc,
@@ -333,10 +334,10 @@ BEGIN
 		DTLB_v    => DTLB_v,
 		DTLB_r    => DTLB_r,
 		DTLB_p    => DTLB_p,
-		tlb_flush_in => c0_tlb_flush,
+		TLB_flush_in => c0_TLB_flush,
 		ITLB_wr_in   => c0_ITLB_wr,
 		DTLB_wr_in   => c0_DTLB_wr,
-		tlb_flush_out => tlb_flush,
+		TLB_flush_out => TLB_flush,
 		ITLB_wr_out   => ITLB_wr,
 		DTLB_wr_out   => DTLB_wr
 	);

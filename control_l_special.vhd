@@ -26,7 +26,7 @@ ENTITY control_l_special IS
 			inta      : OUT STD_LOGIC;
 			--Protected special instruction
 			protected_special_instr: OUT STD_LOGIC;
-			tlb_flush : OUT STD_LOGIC;
+			TLB_flush : OUT STD_LOGIC;
 			ITLB_wr   : OUT STD_LOGIC;
 			DTLB_wr   : OUT STD_LOGIC;
 			TLB_phys  : OUT STD_LOGIC);
@@ -74,9 +74,12 @@ BEGIN
 		"001" when func = F_RETI and opcode = SPECIAL else --Output S1 when RETI
 		addr_a_in;
 
+	--If special and not WRS or TLB instructions, select SYSTEM regfile
 	a_sys <=
-		'1' when opcode = SPECIAL and func /= F_WRS else --If special and not WRS instruction, select SYSTEM regfile
-		'0';
+		'0' when (opcode = SPECIAL) and ((func = F_WRS) or (func = F_WRPI) or (func = F_WRVI) or
+		         (func = F_WRPD) or (func = F_WRVD)) else
+		'1';
+
 
 	abs_jmp_tkn_out <=
 		'1' when opcode = SPECIAL and func = F_RETI else
@@ -95,19 +98,19 @@ BEGIN
 		special_di when func = F_DI and opcode = SPECIAL else
 		special_reti when func = F_RETI and opcode = SPECIAL else
 		special_none;
-		
-	tlb_flush <=
+
+	TLB_flush <=
 		'1' when func = F_FLUSH and opcode = SPECIAL else
 		'0';
-		
+
 	ITLB_wr <=
 		'1' when ((func = F_WRVI) or (func = F_WRPI)) and opcode = SPECIAL else
 		'0';
-		
+
 	DTLB_wr <=
 		'1' when ((func = F_WRVD) or (func = F_WRPD)) and opcode = SPECIAL else
 		'0';
-		
+
 	TLB_phys <=
 		'1' when ((func = F_WRPI) or (func = F_WRPD)) and opcode = SPECIAL else
 		'0';
@@ -125,7 +128,7 @@ BEGIN
 		'1' when func = F_WRVD and opcode = SPECIAL else
 		'1' when func = F_FLUSH and opcode = SPECIAL else
 		'0';
-		
-		
-		
+
+
+
 END Structure;
