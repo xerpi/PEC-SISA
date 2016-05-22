@@ -123,6 +123,6 @@ BEGIN
 	v <= entries(match_entry).v;
 	p <= entries(match_entry).p;
 
-	miss <= '1' when first_match = "000" else '0';
+	miss <= '1' when match = "00000000" else '0';
 
 END Structure;
