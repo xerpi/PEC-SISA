@@ -34,26 +34,26 @@ END control_l_special;
 
 ARCHITECTURE Structure OF control_l_special IS
 
-	constant F_EI:     std_logic_vector(4 downto 0) := "00000";
-	constant F_DI:     std_logic_vector(4 downto 0) := "00001";
-	constant F_RETI:   std_logic_vector(4 downto 0) := "00100";
-	constant F_GETIID: std_logic_vector(4 downto 0) := "01000";
-	constant F_RDS:    std_logic_vector(4 downto 0) := "01100";
-	constant F_WRS:    std_logic_vector(4 downto 0) := "10000";
-	constant F_WRPI:   std_logic_vector(4 downto 0) := "10100";
-	constant F_WRVI:   std_logic_vector(4 downto 0) := "10101";
-	constant F_WRPD:   std_logic_vector(4 downto 0) := "10110";
-	constant F_WRVD:   std_logic_vector(4 downto 0) := "10111";
-	constant F_FLUSH:  std_logic_vector(4 downto 0) := "11000";
-	constant F_HALT:   std_logic_vector(4 downto 0) := "11111";
+	constant F_EI:     std_logic_vector(5 downto 0) := "100000";
+	constant F_DI:     std_logic_vector(5 downto 0) := "100001";
+	constant F_RETI:   std_logic_vector(5 downto 0) := "100100";
+	constant F_GETIID: std_logic_vector(5 downto 0) := "101000";
+	constant F_RDS:    std_logic_vector(5 downto 0) := "101100";
+	constant F_WRS:    std_logic_vector(5 downto 0) := "110000";
+	constant F_WRPI:   std_logic_vector(5 downto 0) := "110100";
+	constant F_WRVI:   std_logic_vector(5 downto 0) := "110101";
+	constant F_WRPD:   std_logic_vector(5 downto 0) := "110110";
+	constant F_WRVD:   std_logic_vector(5 downto 0) := "110111";
+	constant F_FLUSH:  std_logic_vector(5 downto 0) := "111000";
+	constant F_HALT:   std_logic_vector(5 downto 0) := "111111";
 
-	signal func: std_logic_vector(4 downto 0);
+	signal func: std_logic_vector(5 downto 0);
 	signal opcode: std_logic_vector(3 downto 0);
 
 
 BEGIN
 	-- Get func from instruction
-	func <= ir(4 downto 0);
+	func <= ir(5 downto 0);
 	-- Get opcode from instruction
 	opcode <= ir(15 downto 12);
 
