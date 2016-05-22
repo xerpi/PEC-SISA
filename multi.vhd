@@ -318,7 +318,8 @@ begin
 	tkn_jmp_out <=
 		tkn_jmp_ja when state = SYSTEM else -- PC = reg_a = S5
 		--CALLS is seen as JAL (tkn_jmp_ja) but we don't want it to write to the PC
-		tkn_jmp_si when (state = DEMW) and (calls_instr = '1') else
+		-- If protected_instr because of reti we want PCup = PC + 2
+		tkn_jmp_si when (state = DEMW) and ((calls_instr = '1') or (exc_protected_instr = '1')) else
 		tkn_jmp_in;
 
 
