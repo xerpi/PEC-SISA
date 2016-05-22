@@ -35,8 +35,8 @@ ARCHITECTURE Structure OF TLB IS
 	type TLB_entry is record
 		vpn : std_logic_vector(3 downto 0);
 		pfn : std_logic_vector(3 downto 0);
-		v   : std_logic;
 		r   : std_logic;
+		v   : std_logic;
 		p   : std_logic;
 	end record;
 
@@ -67,8 +67,8 @@ BEGIN
 				entries(i) <= (
 					vpn => std_logic_vector(to_unsigned(i, entries(i).vpn'length)),
 					pfn => std_logic_vector(to_unsigned(i, entries(i).pfn'length)),
-					v   => TLB_entry_status_valid,
 					r   => TLB_entry_access_rw,
+					v   => TLB_entry_status_valid,
 					p   => TLB_entry_protection_off
 				);
 			end loop;
@@ -76,8 +76,8 @@ BEGIN
 			entries(3) <= (
 				vpn => X"8",
 				pfn => X"8",
-				v   => TLB_entry_status_valid,
 				r   => TLB_entry_access_rw,
+				v   => TLB_entry_status_valid,
 				p   => TLB_entry_protection_on
 			);
 			--Setup kernel pages(0xC000 to 0xFFFF)
@@ -85,8 +85,8 @@ BEGIN
 				entries(i + 4) <= (
 					vpn => std_logic_vector(to_unsigned(i + 16#C#, entries(i).vpn'length)),
 					pfn => std_logic_vector(to_unsigned(i + 16#C#, entries(i).pfn'length)),
-					v   => TLB_entry_status_valid,
 					r   => TLB_entry_access_ro,
+					v   => TLB_entry_status_valid,
 					p   => TLB_entry_protection_on
 				);
 			end loop;
@@ -98,8 +98,8 @@ BEGIN
 			elsif wr = '1' then
 				if phys = '1' then
 					entries(to_integer(unsigned(index))).pfn <= entry(3 downto 0);
-					entries(to_integer(unsigned(index))).v <= entry(4);
-					entries(to_integer(unsigned(index))).r <= entry(5);
+					entries(to_integer(unsigned(index))).r <= entry(4);
+					entries(to_integer(unsigned(index))).v <= entry(5);
 					entries(to_integer(unsigned(index))).p <= entry(6);
 				else
 					entries(to_integer(unsigned(index))).vpn <= entry(3 downto 0);
@@ -119,8 +119,8 @@ BEGIN
 	match_entry <= log2(first_match);
 
 	pfn <= entries(match_entry).pfn;
-	v <= entries(match_entry).v;
 	r <= entries(match_entry).r;
+	v <= entries(match_entry).v;
 	p <= entries(match_entry).p;
 
 	miss <= '1' when first_match = "000" else '0';

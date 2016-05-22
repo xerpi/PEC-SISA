@@ -98,9 +98,7 @@ ARCHITECTURE Structure OF control_l IS
 			wr_m      : OUT STD_LOGIC;
 			in_d      : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 			word_byte : OUT STD_LOGIC;
-			alu_immed : OUT STD_LOGIC;
-			--Exception requests
-			exc_illegal_instr : OUT STD_LOGIC);
+			alu_immed : OUT STD_LOGIC);
 	END COMPONENT;
 
 	COMPONENT control_l_mov IS
@@ -159,6 +157,12 @@ ARCHITECTURE Structure OF control_l IS
 			TLB_phys  : OUT STD_LOGIC);
 	END COMPONENT;
 
+	COMPONENT illegal_dec IS
+		PORT (ir                : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+			--Exception requests
+			exc_illegal_instr : OUT STD_LOGIC);
+	END COMPONENT;
+
 
 BEGIN
 	opcode <= ir(15 downto 12);
@@ -176,8 +180,7 @@ BEGIN
 		wr_m => c0_g_wr_m,
 		in_d => c0_g_in_d,
 		word_byte => c0_g_word_byte,
-		alu_immed => c0_g_alu_immed,
-		exc_illegal_instr => exc_illegal_instr
+		alu_immed => c0_g_alu_immed
 	);
 
 	c0_mov: control_l_mov port map(
@@ -230,6 +233,11 @@ BEGIN
 		ITLB_wr   => ITLB_wr,
 		DTLB_wr   => DTLB_wr,
 		TLB_phys  => TLB_phys
+	);
+
+	il_d0: illegal_dec port map(
+		ir => ir,
+		exc_illegal_instr => exc_illegal_instr
 	);
 
 	op <= c0_g_op;
