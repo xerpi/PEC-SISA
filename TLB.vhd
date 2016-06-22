@@ -56,6 +56,8 @@ ARCHITECTURE Structure OF TLB IS
 	signal match       : std_logic_vector(7 downto 0);
 	signal first_match : std_logic_vector(7 downto 0);
 	signal match_entry : integer range 0 to 7;
+
+	signal miss_tmp : std_logic;
 BEGIN
 
 
@@ -118,11 +120,18 @@ BEGIN
 
 	match_entry <= log2(first_match);
 
-	pfn <= entries(match_entry).pfn;
+	--pfn <= entries(match_entry).pfn;
 	r <= entries(match_entry).r;
 	v <= entries(match_entry).v;
 	p <= entries(match_entry).p;
 
-	miss <= '1' when match = "00000000" else '0';
+	miss_tmp <= '1' when match = "00000000" else '0';
+
+	-- If TLB misses don't touch anithing
+	pfn <=
+		entries(match_entry).pfn when miss_tmp = '0' else
+		vpn;
+
+	miss <= miss_tmp;
 
 END Structure;
